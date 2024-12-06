@@ -6,33 +6,47 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     
     if (request.action === "saveSummary") {
-        chrome.storage.sync.get(null, async (settings) => {
-            try {
-                console.log('保存总结内容...');
-                const response = await sendToTarget(request.content, settings, request.url, 0, request.title);
-                console.log('目标服务器响应状态:', response.status);
-                
-                if (response.status === 200) {
-                    console.log('保存成功完成');
-                    sendResponse({ success: true });
-                } else {
-                    console.error('目标服务器返回非200状态码');
-                    sendResponse({ 
-                        success: false, 
-                        error: `服务器返回状态码: ${response.status}` 
-                    });
-                }
-            } catch (error) {
-                console.error('保存过程中出错:', error);
-                sendResponse({ 
-                    success: false, 
-                    error: error.message 
-                });
-            }
-        });
-        return true;
+        handleSaveSummary(request, sendResponse);
+        return true;  // 保持消息通道开放
     }
 });
+
+async function handleSaveSummary(request, sendResponse) {
+    try {
+        // 获取存储的设置
+        const result = await chrome.storage.sync.get('settings');
+        const settings = result.settings;
+        
+        if (!settings) {
+            throw new Error('未找到设置信息');
+        }
+
+        console.log('准备保存内容，当前设置:', settings);
+        console.log('includeUrl设置:', settings.includeUrl);
+
+        const response = await sendToTarget(
+            request.content,
+            settings,
+            request.url,
+            0,
+            request.title
+        );
+
+        if (response.ok) {
+            console.log('保存成功完成');
+            showSuccessIcon();
+            sendResponse({ success: true });
+        } else {
+            throw new Error(`服务器返回状态码: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('保存过程中出错:', error);
+        sendResponse({ 
+            success: false, 
+            error: error.message 
+        });
+    }
+}
 
 async function handleContentRequest(request, sendResponse) {
     try {
@@ -43,6 +57,9 @@ async function handleContentRequest(request, sendResponse) {
         if (!settings) {
             throw new Error('未找到设置信息');
         }
+
+        console.log('准备处理内容，当前设置:', settings);
+        console.log('includeUrl设置:', settings.includeUrl);
         
         // 准备内容
         let finalContent = request.content;
@@ -117,21 +134,34 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 });
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     if (info.menuItemId === "sendSelectedText") {
-        chrome.storage.sync.get(null, async (settings) => {
-            try {
-                const response = await sendToTarget(info.selectionText, settings, tab.url, 0, tab.title);
-                
-                if (response.status === 200) {
-                    console.log('成功发送选中文本');
-                } else {
-                    console.error(`发送选中文本失败，状态码: ${response.status}`);
-                }
-            } catch (error) {
-                console.error('Error:', error);
+        try {
+            // 获取存储的设置
+            const result = await chrome.storage.sync.get('settings');
+            const settings = result.settings;
+            
+            if (!settings) {
+                throw new Error('未找到设置信息');
             }
-        });
+
+            const response = await sendToTarget(
+                info.selectionText,
+                settings,
+                tab.url,
+                0,
+                tab.title
+            );
+            
+            if (response.ok) {
+                console.log('成功发送选中文本');
+                showSuccessIcon();
+            } else {
+                throw new Error(`发送选中文本失败，状态码: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('发送选中文本时出错:', error);
+        }
     }
 });
 
@@ -159,31 +189,48 @@ function showSuccessIcon() {
     }, 3000);
 }
 
-async function sendToTarget(content, settings, url, type = 0, title = '') {
-    let finalContent = content;
-    
-    // 根据设置决定是否添加链接
-    if (settings.includeUrl) {
-        const urlReference = `[${title || '未知标题'}](${url})`;
-        finalContent = `${content}\n\n> 来源: ${urlReference}`;
+async function sendToTarget(content, settings, url, retryCount = 0, title = '') {
+    if (!settings.targetUrl) {
+        throw new Error('请设置目标URL');
     }
-    
-    const response = await fetch(settings.targetUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${settings.authKey}`
-        },
-        body: JSON.stringify({
-            content: finalContent,
-            url: url,
-            type: type
-        })
-    });
 
-    if (response.status === 200) {
-        showSuccessIcon();
+    if (!settings.authKey) {
+        throw new Error('请设置认证密钥');
     }
-    
-    return response;
+
+    console.log('发送内容到目标，includeUrl设置:', settings.includeUrl);
+
+    try {
+        // 根据设置决定是否添加URL
+        let finalContent = content;
+        if (settings.includeUrl && url) {
+            finalContent = `${content}\n\n原文链接：[${title || url}](${url})`;
+        }
+
+        const response = await fetch(settings.targetUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': settings.authKey
+            },
+            body: JSON.stringify({
+                content: finalContent
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response;
+    } catch (error) {
+        console.error('发送到目标服务器失败:', error);
+        
+        if (retryCount < 3) {
+            console.log(`重试 (${retryCount + 1}/3)...`);
+            return sendToTarget(content, settings, url, retryCount + 1, title);
+        }
+        
+        throw new Error(`发送失败: ${error.message}`);
+    }
 }

@@ -4,8 +4,8 @@ const defaultSettings = {
     authKey: '',
     modelUrl: '',
     apiKey: '',
-    modelName: 'gpt-3.5-turbo',
-    temperature: 0.7,
+    modelName: 'gpt-4o-mini',
+    temperature: 0.5,
     promptTemplate: `请你根据提供的网页内容，撰写一份结构清晰、重点突出且不遗漏重要内容的摘要。
 
 要求：
@@ -13,7 +13,7 @@ const defaultSettings = {
     *   首先，第一行使用'# 标题'格式取一个简要的大标题,然后下一段简要概述网页的主题和目的。
     *   其次，按照网页内容的逻辑顺序，依次总结各个主要部分的核心内容。
     *   在总结每个部分时，请注意突出该部分的重点和关键信息。
-    *   如果网页内容包含重要数据、图表或结论，请务必在摘要中体现。
+    *   如果网页内容包含重要数据或结论，请务必在摘要中体现。
 2. **突出重点：**  请识别并突出显示网页中的关键信息、主题、重要论点和结论。
 3. **不遗漏重要内容：**  在总结时，请确保覆盖网页的所有重要方面，避免关键信息缺失。
 4. **一句话总结：**  在摘要的最后，请提供一个简洁、精炼的概括性语句，准确概括整个网页的核心内容。
@@ -36,17 +36,19 @@ async function loadSettings() {
         const result = await chrome.storage.sync.get('settings');
         let settings = result.settings;
         
-        // 如果没有保存的设置，或者缺少某些设置项，使用默认值
+        // 如果没有保存的设置，使用默认值
         if (!settings) {
             settings = { ...defaultSettings };
         } else {
             // 确保所有默认设置项都存在
             for (const key in defaultSettings) {
-                if (settings[key] === undefined || settings[key] === '') {
+                if (settings[key] === undefined) {
                     settings[key] = defaultSettings[key];
                 }
             }
         }
+
+        console.log('加载的设置:', settings);
         
         // 更新UI
         document.getElementById('targetUrl').value = settings.targetUrl || '';
@@ -68,19 +70,21 @@ async function loadSettings() {
 
 // 保存设置
 async function saveSettings() {
-    const settings = {
-        targetUrl: document.getElementById('targetUrl').value.trim(),
-        authKey: document.getElementById('authKey').value.trim(),
-        modelUrl: document.getElementById('modelUrl').value.trim(),
-        apiKey: document.getElementById('apiKey').value.trim(),
-        modelName: document.getElementById('modelName').value.trim(),
-        temperature: parseFloat(document.getElementById('temperature').value) || 0.7,
-        promptTemplate: document.getElementById('promptTemplate').value.trim() || defaultSettings.promptTemplate,
-        includeUrl: document.getElementById('includeUrl').checked
-    };
-
     try {
+        const settings = {
+            targetUrl: document.getElementById('targetUrl').value.trim(),
+            authKey: document.getElementById('authKey').value.trim(),
+            modelUrl: document.getElementById('modelUrl').value.trim(),
+            apiKey: document.getElementById('apiKey').value.trim(),
+            modelName: document.getElementById('modelName').value.trim(),
+            temperature: parseFloat(document.getElementById('temperature').value) || 0.7,
+            promptTemplate: document.getElementById('promptTemplate').value.trim() || defaultSettings.promptTemplate,
+            includeUrl: document.getElementById('includeUrl').checked
+        };
+
+        // 保存到chrome.storage
         await chrome.storage.sync.set({ settings });
+        console.log('设置已保存:', settings);
         showStatus('设置已保存', 'success');
         return settings;
     } catch (error) {
@@ -106,6 +110,7 @@ async function resetSettings() {
         document.getElementById('promptTemplate').value = settings.promptTemplate;
         document.getElementById('includeUrl').checked = settings.includeUrl;
         
+        console.log('设置已重置为默认值:', settings);
         showStatus('设置已重置为默认值', 'success');
     } catch (error) {
         console.error('重置设置时出错:', error);
