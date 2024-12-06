@@ -33,7 +33,7 @@
   "web_accessible_resources": [{
     "resources": [
       "images/icon128.png",
-      "images/icon128_success_reverse.png"
+      "images/icon128_success.png"
     ],
     "matches": ["<all_urls>"]
   }],

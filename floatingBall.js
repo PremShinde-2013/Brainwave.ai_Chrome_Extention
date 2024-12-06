@@ -1,5 +1,5 @@
 // 创建并初始化悬浮球
-async function createFloatingBall() {
+function createFloatingBall() {
     const ball = document.createElement('div');
     ball.id = 'blinko-floating-ball';
     ball.innerHTML = `
@@ -18,10 +18,8 @@ async function createFloatingBall() {
             bottom: 20px;
             width: 50px;
             height: 50px;
-            cursor: move;
+            cursor: pointer;
             z-index: 10000;
-            user-select: none;
-            touch-action: none;
         }
 
         .ball-icon {
@@ -68,78 +66,12 @@ async function createFloatingBall() {
         }
     `;
     document.head.appendChild(style);
-    
-    // 从存储中获取位置
-    const result = await chrome.storage.sync.get('floatingBallPosition');
-    const position = result.floatingBallPosition || { right: '20px', bottom: '20px' };
-    
-    // 设置位置
-    ball.style.right = position.right;
-    ball.style.bottom = position.bottom;
-    
     document.body.appendChild(ball);
 
     let isProcessing = false;
-    let isDragging = false;
-    let startX, startY, startRight, startBottom;
 
-    // 处理拖动开始
-    function handleDragStart(e) {
+    ball.addEventListener('click', async function() {
         if (isProcessing) return;
-        
-        isDragging = true;
-        const rect = ball.getBoundingClientRect();
-        startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
-        startY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
-        startRight = window.innerWidth - (rect.left + rect.width);
-        startBottom = window.innerHeight - (rect.top + rect.height);
-        
-        e.preventDefault();
-    }
-
-    // 处理拖动
-    function handleDrag(e) {
-        if (!isDragging) return;
-        
-        const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
-        const clientY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
-        
-        const deltaX = startX - clientX;
-        const deltaY = startY - clientY;
-        
-        const newRight = startRight + deltaX;
-        const newBottom = startBottom + deltaY;
-        
-        ball.style.right = `${newRight}px`;
-        ball.style.bottom = `${newBottom}px`;
-        
-        e.preventDefault();
-    }
-
-    // 处理拖动结束
-    function handleDragEnd() {
-        if (!isDragging) return;
-        
-        isDragging = false;
-        
-        // 保存新位置
-        const position = {
-            right: ball.style.right,
-            bottom: ball.style.bottom
-        };
-        chrome.storage.sync.set({ floatingBallPosition: position });
-    }
-
-    // 添加拖动事件监听器
-    ball.addEventListener('mousedown', handleDragStart);
-    ball.addEventListener('touchstart', handleDragStart);
-    document.addEventListener('mousemove', handleDrag);
-    document.addEventListener('touchmove', handleDrag);
-    document.addEventListener('mouseup', handleDragEnd);
-    document.addEventListener('touchend', handleDragEnd);
-
-    ball.addEventListener('click', async function(e) {
-        if (isDragging || isProcessing) return;
         
         isProcessing = true;
         ball.classList.add('processing');
@@ -149,15 +81,13 @@ async function createFloatingBall() {
             const pageContent = document.body.innerText;
             const pageTitle = document.title;
             const url = window.location.href;
-            const tags = ['自动总结']; // 添加默认标签
 
             // 发送消息给background script处理
             const response = await chrome.runtime.sendMessage({
                 action: 'processAndSendContent',
                 content: pageContent,
                 title: pageTitle,
-                url: url,
-                tags: tags
+                url: url
             });
 
             if (response.success) {
@@ -165,7 +95,7 @@ async function createFloatingBall() {
                 ball.classList.remove('processing');
                 const iconImg = ball.querySelector('img');
                 ball.classList.add('success');
-                iconImg.src = chrome.runtime.getURL('images/icon128_success_reverse.png');
+                iconImg.src = chrome.runtime.getURL('images/icon128_success.png');
 
                 // 3秒后恢复原状
                 setTimeout(() => {
