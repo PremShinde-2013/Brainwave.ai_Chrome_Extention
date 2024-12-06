@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "网页内容提取与总结",
+  "name": "Blinko网页内容提取总结",
   "version": "1.0",
-  "description": "提取网页内容并生成总结",
+  "description": "划词保存、提取网页内容并生成总结",
   "permissions": [
     "activeTab",
     "storage",

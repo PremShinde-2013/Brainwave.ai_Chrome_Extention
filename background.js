@@ -129,7 +129,7 @@ async function getSummaryFromModel(content, settings) {
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "sendSelectedText",
-        title: "保存选中文本",
+        title: "保存选中文本到Blinko",
         contexts: ["selection"]
     });
 });

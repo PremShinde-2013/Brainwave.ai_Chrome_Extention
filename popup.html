@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>网页内容提取与总结</title>
+    <title>Blinko拓展</title>
     <meta charset="UTF-8">
     <style>
         body {
@@ -173,23 +173,23 @@
     <div id="settings" class="tabcontent">
         <h2>设置</h2>
         <div class="input-container">
-            <label for="targetUrl">目标URL:</label>
+            <label for="targetUrl">Blinko API URL:</label>
             <input type="text" id="targetUrl" placeholder="https://your-api-endpoint.com/save">
         </div>
         
         <div class="input-container">
-            <label for="authKey">认证密钥:</label>
+            <label for="authKey">Blinko认证密钥:</label>
             <input type="text" id="authKey" class="sensitive-input" placeholder="your-auth-key">
             <button class="toggle-visibility" title="显示/隐藏">👁️</button>
         </div>
 
         <div class="input-container">
-            <label for="modelUrl">OpenAI接口地址:</label>
+            <label for="modelUrl">OpenAI兼容接口地址:</label>
             <input type="text" id="modelUrl" placeholder="https://api.openai.com/v1/chat/completions">
         </div>
         
         <div class="input-container">
-            <label for="apiKey">OpenAI API密钥:</label>
+            <label for="apiKey">API密钥:</label>
             <input type="text" id="apiKey" class="sensitive-input" placeholder="sk-...">
             <button class="toggle-visibility" title="显示/隐藏">👁️</button>
         </div>
@@ -205,7 +205,7 @@
         </div>
 
         <div class="input-container">
-            <label for="includeUrl">包含网页链接:</label>
+            <label for="includeUrl">是否在保存内容中包含网页链接:</label>
             <input type="checkbox" id="includeUrl" checked>
             <span class="checkbox-label">在请求中添加网页链接</span>
         </div>
