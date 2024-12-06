@@ -1,4 +1,4 @@
-// 监听来自popup的消息
+// 监听来自popup和content script的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getContent") {
         handleContentRequest(request, sendResponse);
@@ -10,6 +10,79 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;  // 保持消息通道开放
     }
 });
+
+async function handleContentRequest(request, sendResponse) {
+    try {
+        // 获取存储的设置
+        const result = await chrome.storage.sync.get('settings');
+        const settings = result.settings;
+        
+        if (!settings) {
+            throw new Error('未找到设置信息');
+        }
+
+        // 检查必要的设置是否存在
+        if (!settings.modelUrl || !settings.apiKey || !settings.modelName) {
+            throw new Error('请先完成API设置');
+        }
+
+        // 生成总结
+        const summary = await getSummaryFromModel(request.content, settings);
+        
+        // 发送总结结果回popup
+        chrome.runtime.sendMessage({
+            action: 'handleSummaryResponse',
+            success: true,
+            summary: summary,
+            url: request.url,
+            title: request.title
+        });
+    } catch (error) {
+        console.error('处理内容请求时出错:', error);
+        chrome.runtime.sendMessage({
+            action: 'handleSummaryResponse',
+            success: false,
+            error: error.message
+        });
+    }
+}
+
+async function getSummaryFromModel(content, settings) {
+    try {
+        const prompt = settings.promptTemplate.replace('{content}', content);
+        
+        const response = await fetch(settings.modelUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${settings.apiKey}`
+            },
+            body: JSON.stringify({
+                model: settings.modelName,
+                messages: [{
+                    role: 'user',
+                    content: prompt
+                }],
+                temperature: settings.temperature
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`API请求失败: ${response.status} ${errorData.error?.message || response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            throw new Error('API返回格式错误');
+        }
+
+        return data.choices[0].message.content.trim();
+    } catch (error) {
+        console.error('获取总结时出错:', error);
+        throw error;
+    }
+}
 
 async function handleSaveSummary(request, sendResponse) {
     try {
@@ -52,85 +125,6 @@ async function handleSaveSummary(request, sendResponse) {
     }
 }
 
-async function handleContentRequest(request, sendResponse) {
-    try {
-        // 获取存储的设置
-        const result = await chrome.storage.sync.get('settings');
-        const settings = result.settings;
-        
-        if (!settings) {
-            throw new Error('未找到设置信息');
-        }
-
-        
-        // 准备内容
-        let finalContent = request.content;
-        
-        // 如果设置了包含URL，添加URL信息
-        if (settings.includeUrl && request.url) {
-            const urlInfo = `\n\n原文链接：[${request.title || request.url}](${request.url})\n\n`;
-            finalContent = urlInfo + finalContent;
-        }
-        
-        // 获取摘要
-        let summary = await getSummaryFromModel(finalContent, settings);
-        
-        // 如果有标签，添加到摘要末尾
-        if (settings.summaryTag) {
-            summary = summary.trim() + '\n' + settings.summaryTag;
-        }
-        
-        sendResponse({
-            success: true,
-            summary: summary
-        });
-    } catch (error) {
-        sendResponse({
-            success: false,
-            error: error.message
-        });
-    }
-}
-
-async function getSummaryFromModel(content, settings) {
-    if (!content || !settings) {
-        throw new Error('缺少必要的内容或设置');
-    }
-    
-    try {
-        const prompt = settings.promptTemplate.replace('{content}', content);
-        
-        const response = await fetch(settings.modelUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${settings.apiKey}`
-            },
-            body: JSON.stringify({
-                model: settings.modelName,
-                messages: [
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-                temperature: parseFloat(settings.temperature) || 0.7
-            })
-        });
-
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(`API错误: ${error}`);
-        }
-
-        const data = await response.json();
-        return data.choices[0].message.content;
-    } catch (error) {
-        console.error('调用API时出错:', error);
-        throw new Error(`调用AI模型失败: ${error.message}`);
-    }
-}
-
 // 右键菜单
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
@@ -151,8 +145,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
                 throw new Error('未找到设置信息');
             }
 
+            // 准备最终内容
+            let finalContent = info.selectionText;
+            if (settings.selectionTag) {
+                finalContent = finalContent.trim() + '\n' + settings.selectionTag;
+            }
+
             const response = await sendToTarget(
-                info.selectionText,
+                finalContent,
                 settings,
                 tab.url,
                 0,
@@ -166,7 +166,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
                 throw new Error(`发送选中文本失败，状态码: ${response.status}`);
             }
         } catch (error) {
-
+            console.error('发送选中文本失败:', error);
         }
     }
 });

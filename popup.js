@@ -161,104 +161,111 @@ function hideStatus() {
 }
 
 // 保存临时总结数据
-function saveTempSummaryData(data) {
-    chrome.storage.local.set({
-        [TEMP_STORAGE_KEY]: data
-    });
+async function saveTempSummaryData(data) {
+    try {
+        await chrome.storage.local.set({ [TEMP_STORAGE_KEY]: data });
+        console.log('临时数据已保存:', data);
+    } catch (error) {
+        console.error('保存临时数据失败:', error);
+    }
 }
 
 // 清除临时总结数据
-function clearTempSummaryData() {
-    chrome.storage.local.remove(TEMP_STORAGE_KEY);
+async function clearTempSummaryData() {
+    try {
+        await chrome.storage.local.remove(TEMP_STORAGE_KEY);
+        console.log('临时数据已清除');
+    } catch (error) {
+        console.error('清除临时数据失败:', error);
+    }
 }
 
 // 加载临时总结数据
 async function loadTempSummaryData() {
-    const data = await chrome.storage.local.get(TEMP_STORAGE_KEY);
-    return data[TEMP_STORAGE_KEY];
+    try {
+        const result = await chrome.storage.local.get(TEMP_STORAGE_KEY);
+        return result[TEMP_STORAGE_KEY];
+    } catch (error) {
+        console.error('加载临时数据失败:', error);
+        return null;
+    }
 }
 
 // 显示总结预览
-function showSummaryPreview() {
-    const tempData = loadTempSummaryData();
-    tempData.then(data => {
-        if (data) {
-            document.getElementById('summaryText').value = data.summary || '';
-            document.getElementById('pageUrl').textContent = data.url ? `URL: ${data.url}` : '';
-            document.getElementById('pageTitle').textContent = data.title ? `标题: ${data.title}` : '';
-            document.getElementById('summaryPreview').style.display = 'block';
+async function showSummaryPreview() {
+    const tempData = await loadTempSummaryData();
+    if (tempData && tempData.summary) {
+        document.getElementById('summaryPreview').style.display = 'block';
+        document.getElementById('summaryText').value = tempData.summary;
+        if (tempData.title) {
+            document.getElementById('pageTitle').textContent = tempData.title;
         }
-    });
-}
-
-// 隐藏总结预览
-function hideSummaryPreview() {
-    document.getElementById('summaryPreview').style.display = 'none';
-    document.getElementById('summaryText').value = '';
-    document.getElementById('pageUrl').textContent = '';
-    document.getElementById('pageTitle').textContent = '';
-    clearTempSummaryData();
+        if (tempData.url) {
+            document.getElementById('pageUrl').textContent = tempData.url;
+        }
+    }
 }
 
 // 处理总结响应
 async function handleSummaryResponse(response) {
     if (response.success) {
-        const tab = await getCurrentTab();
-        
-        // 保存临时数据，包括标题
-        saveTempSummaryData({
-            summary: response.summary,
-            url: tab.url,
-            title: tab.title || ''
+        const settings = await loadSettings();
+        let finalSummary = response.summary;
+
+        // 保存临时数据，不在这里添加标签
+        await saveTempSummaryData({
+            summary: finalSummary,
+            url: response.url,
+            title: response.title,
+            tag: settings.summaryTag  // 只保存标签信息，不添加到内容中
         });
-        
-        showSummaryPreview();
-        showStatus('总结完成', 'success');
+
+        // 显示预览
+        await showSummaryPreview();
+        showStatus('总结生成成功', 'success');
     } else {
-        showStatus('总结失败: ' + response.error, 'error');
+        showStatus('生成总结失败: ' + response.error, 'error');
     }
 }
 
 // 保存总结内容
 async function saveSummary() {
     try {
+        const summary = document.getElementById('summaryText').value;
+        const tempData = await loadTempSummaryData();
         const settings = await loadSettings();
-        const summaryData = await loadTempSummaryData();
         
-        console.log('当前设置:', settings);  
-        console.log('summaryData:', summaryData);  
-        
-        if (!summaryData) {
-            throw new Error('没有找到要保存的总结内容');
+        if (!summary || !tempData) {
+            showStatus('没有可保存的内容', 'error');
+            return;
         }
+
+        showStatus('正在保存...', 'loading');
         
-        let summaryText = document.getElementById('summaryText').value;
-        console.log('准备发送的内容:', {  
-            summaryText,
-            url: settings.includeSummaryUrl ? summaryData.url : undefined,
-            title: summaryData.title,
-            tag: settings.summaryTag
-        });
+        // 在这里添加标签到内容中
+        let finalContent = summary;
+        if (settings.summaryTag) {
+            finalContent = finalContent.trim() + '\n' + settings.summaryTag;
+        }
         
         chrome.runtime.sendMessage({
             action: 'saveSummary',
-            content: summaryText,
-            url: settings.includeSummaryUrl ? summaryData.url : undefined,
-            title: summaryData.title,
-            tag: settings.summaryTag, 
-            isSelection: false
-        }, response => {
+            content: finalContent,
+            url: settings.includeSummaryUrl ? tempData.url : undefined,
+            title: tempData.title
+        }, async response => {
             if (response.success) {
                 showStatus('保存成功', 'success');
-                clearTempSummaryData();
-                hideSummaryPreview();
+                // 清除文本框内容和临时数据
+                document.getElementById('summaryText').value = '';
+                await clearTempSummaryData();
             } else {
                 showStatus('保存失败: ' + response.error, 'error');
             }
         });
     } catch (error) {
         console.error('保存总结时出错:', error);
-        showStatus('保存总结失败: ' + error.message, 'error');
+        showStatus('保存失败: ' + error.message, 'error');
     }
 }
 
@@ -350,6 +357,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         showStatus('正在获取页面内容...', 'loading');
         try {
             const tab = await getCurrentTab();
+            if (!tab) {
+                throw new Error('无法获取当前标签页');
+            }
             chrome.tabs.sendMessage(tab.id, { action: 'getContent' });
         } catch (error) {
             showStatus('获取页面内容失败: ' + error.message, 'error');
@@ -395,10 +405,29 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 
-    // 监听来自background的消息
+    // 监听来自content script和background的消息
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'handleSummaryResponse') {
             handleSummaryResponse(request);
+        } else if (request.action === 'getContent') {
+            if (request.error) {
+                showStatus('获取页面内容失败: ' + request.error, 'error');
+            } else {
+                showStatus('正在生成总结...', 'loading');
+                // 发送到background进行总结
+                chrome.runtime.sendMessage({
+                    action: "getContent",
+                    content: request.content,
+                    url: request.url,
+                    title: request.title
+                });
+            }
         }
     });
+
+    // 加载临时总结数据
+    const tempData = await loadTempSummaryData();
+    if (tempData && tempData.summary) {
+        await showSummaryPreview();
+    }
 });
