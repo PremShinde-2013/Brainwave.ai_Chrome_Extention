@@ -21,8 +21,6 @@ async function handleSaveSummary(request, sendResponse) {
             throw new Error('未找到设置信息');
         }
 
-        console.log('handleSaveSummary - 收到的请求:', request);  
-        console.log('handleSaveSummary - 当前设置:', settings);
 
         // 准备最终内容
         let finalContent = request.content;
@@ -30,7 +28,6 @@ async function handleSaveSummary(request, sendResponse) {
         // 如果有标签，添加到内容末尾
         if (request.tag) {
             finalContent = finalContent.trim() + '\n' + request.tag;
-            console.log('handleSaveSummary - 添加标签后的内容:', finalContent);  
         }
 
         const response = await sendToTarget(
@@ -42,14 +39,12 @@ async function handleSaveSummary(request, sendResponse) {
         );
 
         if (response.ok) {
-            console.log('保存成功完成');
             showSuccessIcon();
             sendResponse({ success: true });
         } else {
             throw new Error(`服务器返回状态码: ${response.status}`);
         }
     } catch (error) {
-        console.error('保存过程中出错:', error);
         sendResponse({ 
             success: false, 
             error: error.message 
@@ -67,8 +62,6 @@ async function handleContentRequest(request, sendResponse) {
             throw new Error('未找到设置信息');
         }
 
-        console.log('准备处理内容，当前设置:', settings);
-        console.log('includeUrl设置:', settings.includeUrl);
         
         // 准备内容
         let finalContent = request.content;
@@ -85,7 +78,6 @@ async function handleContentRequest(request, sendResponse) {
         // 如果有标签，添加到摘要末尾
         if (settings.summaryTag) {
             summary = summary.trim() + '\n' + settings.summaryTag;
-            console.log('handleContentRequest - 添加标签后的内容:', summary);
         }
         
         sendResponse({
@@ -93,7 +85,6 @@ async function handleContentRequest(request, sendResponse) {
             summary: summary
         });
     } catch (error) {
-        console.error('处理内容请求时出错:', error);
         sendResponse({
             success: false,
             error: error.message
@@ -177,13 +168,12 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
             );
             
             if (response.ok) {
-                console.log('成功发送选中文本');
                 showSuccessIcon();
             } else {
                 throw new Error(`发送选中文本失败，状态码: ${response.status}`);
             }
         } catch (error) {
-            console.error('发送选中文本时出错:', error);
+
         }
     }
 });
@@ -221,35 +211,12 @@ async function sendToTarget(content, settings, url, retryCount = 0, title = '') 
         throw new Error('请设置认证密钥');
     }
 
-    console.log('sendToTarget - 初始内容:', content);  
-    console.log('sendToTarget - URL和标题:', { url, title });  
-
     try {
         // 根据设置决定是否添加URL
         let finalContent = content;
         if (settings.includeUrl && url) {
-            // 检查内容中是否已经包含标签（以#开头的行）
-            const lines = finalContent.split('\n');
-            const lastLine = lines[lines.length - 1];
-            const hasTag = lastLine.trim().startsWith('#');
-            
-            console.log('sendToTarget - 内容分析:', {  
-                lines,
-                lastLine,
-                hasTag
-            });
-            
-            if (hasTag) {
-                // 如果有标签，将URL插入到标签之前
-                const tag = lines.pop(); // 移除标签
-                finalContent = lines.join('\n'); // 重新组合其他内容
-                finalContent = `${finalContent}\n\n原文链接：[${title || url}](${url})\n${tag}`; // 添加URL和标签
-            } else {
-                // 如果没有标签，直接添加URL
-                finalContent = `${finalContent}\n\n原文链接：[${title || url}](${url})`;
-            }
-            
-            console.log('sendToTarget - 添加URL后的内容:', finalContent);  
+            // 直接添加URL到内容末尾
+            finalContent = `${finalContent}\n\n原文链接：[${title || url}](${url})`;
         }
 
         const response = await fetch(settings.targetUrl, {
@@ -269,10 +236,8 @@ async function sendToTarget(content, settings, url, retryCount = 0, title = '') 
 
         return response;
     } catch (error) {
-        console.error('发送到目标服务器失败:', error);
         
         if (retryCount < 3) {
-            console.log(`重试 (${retryCount + 1}/3)...`);
             return sendToTarget(content, settings, url, retryCount + 1, title);
         }
         
