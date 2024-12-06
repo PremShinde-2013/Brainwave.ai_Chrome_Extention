@@ -5,140 +5,245 @@
     <meta charset="UTF-8">
     <style>
         body {
-            width: 400px;
-            padding: 20px;
-            font-family: Arial, sans-serif;
+            width: 380px;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 5px;
-            margin-bottom: 10px;
-        }
-        textarea {
-            width: 100%;
-            height: 100px;
-            padding: 5px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
+
         .tab {
-            overflow: hidden;
-            border: 1px solid #ccc;
-            background-color: #f1f1f1;
-            margin-bottom: 20px;
+            display: flex;
+            background-color: #fff;
+            border-bottom: 1px solid #e9ecef;
+            padding: 0;
+            margin: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
+
         .tab button {
-            background-color: inherit;
-            float: left;
+            flex: 1;
+            background-color: transparent;
             border: none;
             outline: none;
             cursor: pointer;
-            padding: 14px 16px;
-            color: black;
-            margin: 0;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #495057;
+            position: relative;
+            transition: all 0.2s ease;
         }
+
         .tab button:hover {
-            background-color: #ddd;
+            background-color: #f8f9fa;
+            color: #C35AF7;
         }
+
         .tab button.active {
-            background-color: #ccc;
+            color: #C35AF7;
+            font-weight: 500;
         }
+
+        .tab button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #C35AF7;
+        }
+
         .tabcontent {
             display: none;
-            padding: 6px 12px;
-            border: 1px solid #ccc;
-            border-top: none;
+            padding: 20px;
+            background: #fff;
+            min-height: 300px;
         }
-        /* 添加状态显示样式 */
-        #status {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            display: none;
+
+        h2 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: #212529;
+            font-weight: 500;
         }
-        .loading {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
+
+        .function-section {
+            margin-bottom: 24px;
         }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+
+        .function-title {
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        /* 添加总结预览区域样式 */
-        #summaryPreview {
-            display: none;
-            margin-top: 15px;
-        }
-        #summaryText {
+
+        .extract-button {
             width: 100%;
-            height: 150px;
-            margin-bottom: 10px;
-            padding: 8px;
-            resize: vertical;
+            padding: 10px;
+            background-color: #FFCC00;
+            color: #000000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
         }
-        .preview-actions {
+
+        .extract-button:hover {
+            background-color: #E6B800;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            resize: none;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            transition: border-color 0.2s ease;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .text-input:focus {
+            border-color: #C35AF7;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(195, 90, 247, 0.1);
+        }
+
+        #quickNoteInput {
+            height: 120px;
+        }
+
+        #summaryText, #promptTemplate {
+            height: 200px;
+        }
+
+        .button-group {
             display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
+            gap: 8px;
         }
-        .preview-actions button {
+
+        .send-button {
+            flex: 2;
+            padding: 8px 16px;
+            background-color: #FFCC00;
+            color: #000000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .send-button:hover {
+            background-color: #E6B800;
+        }
+
+        .clear-button {
             flex: 1;
-            margin: 0 5px;
+            padding: 8px 16px;
+            background-color: #f1f3f5;
+            color: #495057;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
-        .url-display {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-            word-break: break-all;
+
+        .clear-button:hover {
+            background-color: #e9ecef;
         }
-        /* 添加输入框相关样式 */
+
+        #status {
+            margin-top: 12px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success {
+            background-color: #FFF3CC;
+            color: #806600;
+            border: 1px solid #FFE680;
+        }
+
+        .error {
+            background-color: #FCE8FF;
+            color: #61157B;
+            border: 1px solid #E9B3F9;
+        }
+
+        /* 密钥输入框相关样式 */
         .input-container {
             position: relative;
-            margin-bottom: 10px;
+            margin-bottom: 16px;
         }
-        
+
         .toggle-visibility {
             position: absolute;
-            right: 5px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
             background: none;
             border: none;
             padding: 5px;
+            color: #495057;
+            font-size: 16px;
+            z-index: 2;
         }
-        
+
         .sensitive-input {
             -webkit-text-security: disc;
+            padding-right: 35px !important;
         }
-        
+
         .sensitive-input.visible {
             -webkit-text-security: none;
+        }
+
+        /* 设置页面样式 */
+        .input-container label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #868e96;
+            margin-top: 4px;
+        }
+
+        .input-container input[type="text"]:focus,
+        .input-container input[type="number"]:focus,
+        .input-container textarea:focus {
+            border-color: #C35AF7;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(195, 90, 247, 0.1);
+        }
+
+        /* 链接颜色 */
+        a {
+            color: #C35AF7;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -148,24 +253,33 @@
         <button class="tablinks" data-tab="settings">设置</button>
     </div>
 
-    <!-- 添加状态显示区域 -->
     <div id="status"></div>
 
     <div id="main" class="tabcontent" style="display: block;">
-        <h2>功能操作</h2>
-        <button id="extract">提取并总结页面内容</button>
+        <div class="function-section">
+            <div class="function-title">快捷记录</div>
+            <textarea id="quickNoteInput" class="text-input" placeholder="在此输入笔记内容..."></textarea>
+            <div class="button-group">
+                <button id="sendQuickNote" class="send-button">发送</button>
+                <button id="clearQuickNote" class="clear-button">清除</button>
+            </div>
+        </div>
+
+        <div class="function-section">
+            <div class="function-title">网页总结</div>
+            <button id="extract" class="extract-button">提取并总结页面内容</button>
+        </div>
         
-        <!-- 添加总结预览区域 -->
         <div id="summaryPreview">
             <h3>总结预览</h3>
-            <textarea id="summaryText" placeholder="总结内容将显示在这里..."></textarea>
+            <textarea id="summaryText" class="text-input" placeholder="总结内容将显示在这里..."></textarea>
             <div class="url-display">
                 <div id="pageTitle"></div>
                 <div id="pageUrl"></div>
             </div>
             <div class="preview-actions">
-                <button id="cancelEdit">取消</button>
-                <button id="editSummary">修改并保存</button>
+                <button id="cancelEdit" class="clear-button">取消</button>
+                <button id="editSummary" class="send-button">修改并保存</button>
             </div>
         </div>
     </div>
@@ -174,39 +288,39 @@
         <h2>设置</h2>
         <div class="input-container">
             <label for="targetUrl">Blinko API URL:</label>
-            <input type="text" id="targetUrl" placeholder="https://your-api-endpoint.com/save">
+            <input type="text" id="targetUrl" class="text-input" placeholder="https://your-api-endpoint.com/save">
         </div>
         
         <div class="input-container">
             <label for="authKey">Blinko认证密钥:</label>
-            <input type="text" id="authKey" class="sensitive-input" placeholder="your-auth-key">
+            <input type="text" id="authKey" class="text-input sensitive-input" placeholder="your-auth-key">
             <button class="toggle-visibility" title="显示/隐藏">👁️</button>
         </div>
 
         <div class="input-container">
             <label for="modelUrl">OpenAI兼容接口地址:</label>
-            <input type="text" id="modelUrl" placeholder="https://api.openai.com/v1/chat/completions">
+            <input type="text" id="modelUrl" class="text-input" placeholder="https://api.openai.com/v1/chat/completions">
         </div>
         
         <div class="input-container">
             <label for="apiKey">API密钥:</label>
-            <input type="text" id="apiKey" class="sensitive-input" placeholder="sk-...">
+            <input type="text" id="apiKey" class="text-input sensitive-input" placeholder="sk-...">
             <button class="toggle-visibility" title="显示/隐藏">👁️</button>
         </div>
 
         <div class="input-container">
             <label for="modelName">模型名称:</label>
-            <input type="text" id="modelName" placeholder="gpt-3.5-turbo">
+            <input type="text" id="modelName" class="text-input" placeholder="gpt-3.5-turbo">
         </div>
 
         <div class="input-container">
             <label for="temperature">温度:</label>
-            <input type="number" id="temperature" min="0" max="1" step="0.1" value="0.7">
+            <input type="number" id="temperature" class="text-input" min="0" max="1" step="0.1" value="0.7">
         </div>
 
         <div class="input-container">
             <label for="promptTemplate">提示词模板:</label>
-            <textarea id="promptTemplate" placeholder="请用简洁的语言总结以下内容，突出重点：{content}"></textarea>
+            <textarea id="promptTemplate" class="text-input" placeholder="请用简洁的语言总结以下内容，突出重点：{content}"></textarea>
         </div>
 
         <div class="input-container">
@@ -223,13 +337,13 @@
 
         <div class="input-container">
             <label for="summaryTag">网页总结标签:</label>
-            <input type="text" id="summaryTag" placeholder="#阅读/网页">
+            <input type="text" id="summaryTag" class="text-input" placeholder="#阅读/网页">
             <div class="help-text">这个标签会添加到网页总结的末尾</div>
         </div>
 
         <div class="input-container">
             <label for="selectionTag">划词保存标签:</label>
-            <input type="text" id="selectionTag" placeholder="#摘录">
+            <input type="text" id="selectionTag" class="text-input" placeholder="#摘录">
             <div class="help-text">这个标签会添加到划词保存内容的末尾</div>
         </div>
 

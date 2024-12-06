@@ -31,6 +31,7 @@ const defaultSettings = {
 
 // 临时存储键
 const TEMP_STORAGE_KEY = 'tempSummaryData';
+const QUICK_NOTE_KEY = 'quickNoteData';  // 快捷记录的存储键
 
 // 加载设置
 async function loadSettings() {
@@ -268,125 +269,122 @@ async function getCurrentTab() {
     return tab;
 }
 
+// 保存快捷记录内容
+function saveQuickNote() {
+    const content = document.getElementById('quickNoteInput').value;
+    chrome.storage.local.set({ [QUICK_NOTE_KEY]: content });
+}
+
+// 加载快捷记录内容
+async function loadQuickNote() {
+    try {
+        const result = await chrome.storage.local.get(QUICK_NOTE_KEY);
+        if (result[QUICK_NOTE_KEY]) {
+            document.getElementById('quickNoteInput').value = result[QUICK_NOTE_KEY];
+        }
+    } catch (error) {
+        console.error('加载快捷记录失败:', error);
+    }
+}
+
+// 清除快捷记录内容
+function clearQuickNote() {
+    document.getElementById('quickNoteInput').value = '';
+    chrome.storage.local.remove(QUICK_NOTE_KEY);
+}
+
+// 发送快捷记录
+async function sendQuickNote() {
+    try {
+        const content = document.getElementById('quickNoteInput').value;
+        if (!content.trim()) {
+            showStatus('请输入笔记内容', 'error');
+            return;
+        }
+
+        const result = await chrome.storage.sync.get('settings');
+        const settings = result.settings;
+        
+        if (!settings) {
+            throw new Error('未找到设置信息');
+        }
+
+        chrome.runtime.sendMessage({
+            action: 'saveSummary',
+            content: content,
+            url: undefined,  // 不包含URL
+            title: undefined,
+            tag: undefined,  // 不包含标签
+            isSelection: false
+        }, response => {
+            if (response.success) {
+                showStatus('发送成功', 'success');
+                clearQuickNote();  // 发送成功后清除内容
+            } else {
+                showStatus('发送失败: ' + response.error, 'error');
+            }
+        });
+    } catch (error) {
+        showStatus('发送失败: ' + error.message, 'error');
+    }
+}
+
 // 初始化事件监听器
 document.addEventListener('DOMContentLoaded', async function() {
     // 加载设置
     await loadSettings();
     
-    // 加载临时总结数据
-    loadTempSummaryData().then(data => {
-        if (data && data.summary) {
-            showSummaryPreview();
-        }
-    });
+    // 加载快捷记录内容
+    await loadQuickNote();
 
     // 显示主页面
     document.getElementById('main').style.display = 'block';
 
-    // 获取当前标签页
-    const tab = await getCurrentTab();
+    // 绑定快捷记录相关事件
+    document.getElementById('quickNoteInput').addEventListener('input', saveQuickNote);
+    document.getElementById('sendQuickNote').addEventListener('click', sendQuickNote);
+    document.getElementById('clearQuickNote').addEventListener('click', clearQuickNote);
 
-    // 保存设置按钮
-    document.getElementById('saveSettings').addEventListener('click', saveSettings);
-
-    // 重置设置按钮
-    document.getElementById('resetSettings').addEventListener('click', async () => {
-        if (confirm('确定要重置所有设置到默认值吗？')) {
-            await resetSettings();
-        }
-    });
-
-    // 提取按钮
+    // 绑定总结相关事件
     document.getElementById('extract').addEventListener('click', async () => {
+        showStatus('正在获取页面内容...', 'loading');
         try {
-            // 获取当前标签页
             const tab = await getCurrentTab();
-            if (!tab) {
-                showStatus('无法获取当前标签页', 'error');
-                return;
-            }
-
-            showStatus('正在提取内容...', 'loading');
-            
-            // 发送消息到content script获取页面内容
-            chrome.tabs.sendMessage(tab.id, { action: "getContent" }, async (response) => {
-                if (chrome.runtime.lastError) {
-                    showStatus('获取页面内容失败: ' + chrome.runtime.lastError.message, 'error');
-                    return;
-                }
-
-                if (!response || !response.success) {
-                    showStatus('提取内容失败: ' + (response?.error || '未知错误'), 'error');
-                    return;
-                }
-
-                if (!response.content || response.content.trim().length === 0) {
-                    showStatus('页面内容为空', 'error');
-                    return;
-                }
-
-                showStatus('正在生成总结...', 'loading');
-                
-                // 发送消息到background script生成总结
-                chrome.runtime.sendMessage({
-                    action: "getContent",
-                    content: response.content,
-                    url: tab.url,
-                    title: tab.title
-                }, (response) => {
-                    if (chrome.runtime.lastError) {
-                        showStatus('生成总结失败: ' + chrome.runtime.lastError.message, 'error');
-                        return;
-                    }
-
-                    handleSummaryResponse(response);
-                });
-            });
+            chrome.tabs.sendMessage(tab.id, { action: 'getContent' });
         } catch (error) {
-            console.error('提取内容时出错:', error);
-            showStatus('提取内容失败: ' + error.message, 'error');
+            showStatus('获取页面内容失败: ' + error.message, 'error');
         }
     });
 
-    // 修改并保存按钮事件
-    document.getElementById('editSummary').addEventListener('click', () => {
-        const summary = document.getElementById('summaryText').value;
-        const tempData = loadTempSummaryData();
-        
-        tempData.then(data => {
-            if (!summary || !data) {
-                showStatus('没有可保存的内容', 'error');
-                return;
-            }
-
-            chrome.runtime.sendMessage({
-                action: 'saveSummary',
-                content: summary,
-                url: data.url,
-                title: data.title
-            }, response => {
-                if (response.success) {
-                    showStatus('保存成功', 'success');
-                    clearTempSummaryData();
-                    hideSummaryPreview();
-                } else {
-                    showStatus('保存失败: ' + response.error, 'error');
-                }
-            });
-        });
-    });
-
-    // 取消按钮事件
+    // 绑定总结预览相关事件
+    document.getElementById('editSummary').addEventListener('click', saveSummary);
     document.getElementById('cancelEdit').addEventListener('click', () => {
         hideSummaryPreview();
-        hideStatus();
+        clearTempSummaryData();
     });
 
-    // 添加显示/隐藏按钮的事件监听
+    // 绑定设置相关事件
+    document.getElementById('saveSettings').addEventListener('click', async () => {
+        await saveSettings();
+        showStatus('设置已保存', 'success');
+        setTimeout(hideStatus, 2000);
+    });
+
+    document.getElementById('resetSettings').addEventListener('click', async () => {
+        await resetSettings();
+        showStatus('设置已重置为默认值', 'success');
+        setTimeout(hideStatus, 2000);
+    });
+
+    // 绑定密钥显示/隐藏事件
     document.querySelectorAll('.toggle-visibility').forEach(button => {
         button.addEventListener('click', function() {
             const input = this.previousElementSibling;
-            input.classList.toggle('visible');
+            if (input) {
+                input.classList.toggle('visible');
+                // 更新按钮图标
+                this.textContent = input.classList.contains('visible') ? '🔒' : '👁️';
+            }
         });
     });
 
@@ -395,5 +393,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         button.addEventListener('click', function(event) {
             openTab(event, this.dataset.tab);
         });
+    });
+
+    // 监听来自background的消息
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'handleSummaryResponse') {
+            handleSummaryResponse(request);
+        }
     });
 });
