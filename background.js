@@ -149,11 +149,22 @@ async function handleFloatingBallRequest(request, sendResponse) {
         // 生成总结
         const summary = await getSummaryFromModel(request.content, settings);
         
+        // 准备最终内容
+        let finalContent = summary;
+        // 如果有总结标签，添加到内容末尾
+        if (settings.summaryTag) {
+            finalContent = finalContent.trim() + '\n' + settings.summaryTag;
+        }
+
         // 直接发送到服务器
-        await sendToTarget(summary, settings, request.url, 0, request.title, false);
+        const response = await sendToTarget(finalContent, settings, request.url, 0, request.title, false);
         
-        // 发送成功响应
-        sendResponse({ success: true });
+        if (response.ok) {
+            // 发送成功响应
+            sendResponse({ success: true });
+        } else {
+            throw new Error(`服务器返回状态码: ${response.status}`);
+        }
     } catch (error) {
         console.error('处理悬浮球请求时出错:', error);
         sendResponse({ success: false, error: error.message });
