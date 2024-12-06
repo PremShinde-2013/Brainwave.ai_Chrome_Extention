@@ -200,21 +200,32 @@
         </div>
 
         <div class="input-container">
-            <label for="temperature">温度参数:</label>
-            <input type="number" id="temperature" min="0" max="2" step="0.1" value="0.7">
+            <label for="temperature">温度:</label>
+            <input type="number" id="temperature" min="0" max="1" step="0.1" value="0.7">
         </div>
 
-        <div class="input-container">
-            <label for="includeUrl">是否在保存内容中包含网页链接:</label>
-            <input type="checkbox" id="includeUrl" checked>
-            <span class="checkbox-label">在请求中添加网页链接</span>
-        </div>
-        
         <div class="input-container">
             <label for="promptTemplate">提示词模板:</label>
             <textarea id="promptTemplate" placeholder="请用简洁的语言总结以下内容，突出重点：{content}"></textarea>
         </div>
-        
+
+        <div class="input-container">
+            <label for="includeUrl">包含URL:</label>
+            <input type="checkbox" id="includeUrl" checked>
+        </div>
+
+        <div class="input-container">
+            <label for="summaryTag">网页总结标签:</label>
+            <input type="text" id="summaryTag" placeholder="#阅读/网页">
+            <div class="help-text">这个标签会添加到网页总结的末尾</div>
+        </div>
+
+        <div class="input-container">
+            <label for="selectionTag">划词保存标签:</label>
+            <input type="text" id="selectionTag" placeholder="#摘录">
+            <div class="help-text">这个标签会添加到划词保存内容的末尾</div>
+        </div>
+
         <div class="settings-actions">
             <button id="saveSettings" class="button">保存设置</button>
             <button id="resetSettings" class="button secondary">重置默认值</button>

@@ -21,11 +21,20 @@ async function handleSaveSummary(request, sendResponse) {
             throw new Error('未找到设置信息');
         }
 
-        console.log('准备保存内容，当前设置:', settings);
-        console.log('includeUrl设置:', settings.includeUrl);
+        console.log('handleSaveSummary - 收到的请求:', request);  
+        console.log('handleSaveSummary - 当前设置:', settings);
+
+        // 准备最终内容
+        let finalContent = request.content;
+
+        // 如果有标签，添加到内容末尾
+        if (request.tag) {
+            finalContent = finalContent.trim() + '\n' + request.tag;
+            console.log('handleSaveSummary - 添加标签后的内容:', finalContent);  
+        }
 
         const response = await sendToTarget(
-            request.content,
+            finalContent,
             settings,
             request.url,
             0,
@@ -71,7 +80,13 @@ async function handleContentRequest(request, sendResponse) {
         }
         
         // 获取摘要
-        const summary = await getSummaryFromModel(finalContent, settings);
+        let summary = await getSummaryFromModel(finalContent, settings);
+        
+        // 如果有标签，添加到摘要末尾
+        if (settings.summaryTag) {
+            summary = summary.trim() + '\n' + settings.summaryTag;
+            console.log('handleContentRequest - 添加标签后的内容:', summary);
+        }
         
         sendResponse({
             success: true,
@@ -145,8 +160,16 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
                 throw new Error('未找到设置信息');
             }
 
+            // 准备最终内容
+            let finalContent = info.selectionText;
+
+            // 添加划词保存标签
+            if (settings.selectionTag) {
+                finalContent = finalContent.trim() + '\n' + settings.selectionTag;
+            }
+
             const response = await sendToTarget(
-                info.selectionText,
+                finalContent,
                 settings,
                 tab.url,
                 0,
@@ -198,13 +221,35 @@ async function sendToTarget(content, settings, url, retryCount = 0, title = '') 
         throw new Error('请设置认证密钥');
     }
 
-    console.log('发送内容到目标，includeUrl设置:', settings.includeUrl);
+    console.log('sendToTarget - 初始内容:', content);  
+    console.log('sendToTarget - URL和标题:', { url, title });  
 
     try {
         // 根据设置决定是否添加URL
         let finalContent = content;
         if (settings.includeUrl && url) {
-            finalContent = `${content}\n\n原文链接：[${title || url}](${url})`;
+            // 检查内容中是否已经包含标签（以#开头的行）
+            const lines = finalContent.split('\n');
+            const lastLine = lines[lines.length - 1];
+            const hasTag = lastLine.trim().startsWith('#');
+            
+            console.log('sendToTarget - 内容分析:', {  
+                lines,
+                lastLine,
+                hasTag
+            });
+            
+            if (hasTag) {
+                // 如果有标签，将URL插入到标签之前
+                const tag = lines.pop(); // 移除标签
+                finalContent = lines.join('\n'); // 重新组合其他内容
+                finalContent = `${finalContent}\n\n原文链接：[${title || url}](${url})\n${tag}`; // 添加URL和标签
+            } else {
+                // 如果没有标签，直接添加URL
+                finalContent = `${finalContent}\n\n原文链接：[${title || url}](${url})`;
+            }
+            
+            console.log('sendToTarget - 添加URL后的内容:', finalContent);  
         }
 
         const response = await fetch(settings.targetUrl, {

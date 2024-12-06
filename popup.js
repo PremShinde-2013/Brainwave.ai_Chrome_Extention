@@ -23,7 +23,9 @@ const defaultSettings = {
 *   摘要的长度应适中，既要全面覆盖重要内容，又要避免冗长啰嗦。
 *   总结的末尾无需再进行总结，有一句话总结代替。
 以下是网页内容：{content}`,
-    includeUrl: true
+    includeUrl: true,
+    summaryTag: '#阅读/网页',  // 网页总结的标签
+    selectionTag: '#摘录'      // 划词保存的标签
 };
 
 // 临时存储键
@@ -58,6 +60,8 @@ async function loadSettings() {
         document.getElementById('temperature').value = settings.temperature || '0.7';
         document.getElementById('promptTemplate').value = settings.promptTemplate || defaultSettings.promptTemplate;
         document.getElementById('includeUrl').checked = settings.includeUrl !== false;
+        document.getElementById('summaryTag').value = settings.summaryTag || defaultSettings.summaryTag;
+        document.getElementById('selectionTag').value = settings.selectionTag || defaultSettings.selectionTag;
         
         return settings;
     } catch (error) {
@@ -78,7 +82,9 @@ async function saveSettings() {
             modelName: document.getElementById('modelName').value.trim(),
             temperature: parseFloat(document.getElementById('temperature').value) || 0.7,
             promptTemplate: document.getElementById('promptTemplate').value.trim() || defaultSettings.promptTemplate,
-            includeUrl: document.getElementById('includeUrl').checked
+            includeUrl: document.getElementById('includeUrl').checked,
+            summaryTag: document.getElementById('summaryTag').value.trim(),
+            selectionTag: document.getElementById('selectionTag').value.trim()
         };
 
         // 保存到chrome.storage
@@ -108,6 +114,8 @@ async function resetSettings() {
         document.getElementById('temperature').value = settings.temperature;
         document.getElementById('promptTemplate').value = settings.promptTemplate;
         document.getElementById('includeUrl').checked = settings.includeUrl;
+        document.getElementById('summaryTag').value = settings.summaryTag;
+        document.getElementById('selectionTag').value = settings.selectionTag;
         
         console.log('设置已重置为默认值:', settings);
         showStatus('设置已重置为默认值', 'success');
@@ -208,28 +216,45 @@ async function handleSummaryResponse(response) {
 
 // 保存总结内容
 async function saveSummary() {
-    const summaryText = document.getElementById('summaryText').value;
-    const tempData = await loadTempSummaryData();
-    
-    if (!summaryText || !tempData) {
-        showStatus('没有可保存的内容', 'error');
-        return;
-    }
-
-    chrome.runtime.sendMessage({
-        action: 'saveSummary',
-        content: summaryText,
-        url: tempData.url || '',
-        title: tempData.title || ''
-    }, response => {
-        if (response.success) {
-            showStatus('保存成功', 'success');
-            clearTempSummaryData();
-            hideSummaryPreview();
-        } else {
-            showStatus('保存失败: ' + response.error, 'error');
+    try {
+        const settings = await loadSettings();
+        const summaryData = await loadTempSummaryData();
+        
+        console.log('当前设置:', settings);  
+        console.log('summaryData:', summaryData);  
+        
+        if (!summaryData) {
+            throw new Error('没有找到要保存的总结内容');
         }
-    });
+        
+        let summaryText = document.getElementById('summaryText').value;
+        console.log('准备发送的内容:', {  
+            summaryText,
+            url: settings.includeUrl ? summaryData.url : undefined,
+            title: summaryData.title,
+            tag: settings.summaryTag
+        });
+        
+        chrome.runtime.sendMessage({
+            action: 'saveSummary',
+            content: summaryText,
+            url: settings.includeUrl ? summaryData.url : undefined,
+            title: summaryData.title,
+            tag: settings.summaryTag, 
+            isSelection: false
+        }, response => {
+            if (response.success) {
+                showStatus('保存成功', 'success');
+                clearTempSummaryData();
+                hideSummaryPreview();
+            } else {
+                showStatus('保存失败: ' + response.error, 'error');
+            }
+        });
+    } catch (error) {
+        console.error('保存总结时出错:', error);
+        showStatus('保存总结失败: ' + error.message, 'error');
+    }
 }
 
 // 获取当前标签页信息
