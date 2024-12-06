@@ -56,7 +56,10 @@ async function getSummaryFromModel(content, settings) {
     try {
         const prompt = settings.promptTemplate.replace('{content}', content);
         
-        const response = await fetch(settings.modelUrl, {
+        // 获取完整的API URL
+        const fullUrl = getFullApiUrl(settings.modelUrl, '/chat/completions');
+        
+        const response = await fetch(fullUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -241,6 +244,22 @@ function showSuccessIcon() {
     }, 3000);
 }
 
+// 获取完整的API URL
+function getFullApiUrl(baseUrl, endpoint) {
+    try {
+        const url = new URL(baseUrl);
+        const pathParts = url.pathname.split('/');
+        const v1Index = pathParts.indexOf('v1');
+        if (v1Index === -1) {
+            throw new Error('URL格式不正确，需要包含/v1路径');
+        }
+        return url.origin + pathParts.slice(0, v1Index + 1).join('/') + endpoint;
+    } catch (error) {
+        console.error('解析URL时出错:', error);
+        throw new Error('URL格式不正确: ' + error.message);
+    }
+}
+
 async function sendToTarget(content, settings, url, retryCount = 0, title = '', isSelection = false) {
     if (!settings.targetUrl) {
         throw new Error('请设置目标URL');
@@ -257,7 +276,10 @@ async function sendToTarget(content, settings, url, retryCount = 0, title = '', 
             finalContent = `${finalContent}\n\n原文链接：[${title || url}](${url})`;
         }
 
-        const response = await fetch(settings.targetUrl, {
+        // 获取完整的API URL
+        const fullUrl = getFullApiUrl(settings.targetUrl, '/note/upsert');
+
+        const response = await fetch(fullUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

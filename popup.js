@@ -354,6 +354,65 @@ async function sendQuickNote() {
     }
 }
 
+// 从Blinko获取AI配置
+async function fetchAiConfig() {
+    try {
+        const targetUrl = document.getElementById('targetUrl').value.trim();
+        const authKey = document.getElementById('authKey').value.trim();
+
+        if (!targetUrl || !authKey) {
+            showStatus('请先填写Blinko API URL和认证密钥', 'error');
+            return;
+        }
+
+        // 提取基础URL
+        let baseUrl = '';
+        try {
+            const url = new URL(targetUrl);
+            const pathParts = url.pathname.split('/');
+            const v1Index = pathParts.indexOf('v1');
+            if (v1Index === -1) {
+                throw new Error('URL格式不正确，需要包含/v1路径');
+            }
+            baseUrl = url.origin + pathParts.slice(0, v1Index + 1).join('/');
+        } catch (error) {
+            showStatus('URL格式不正确: ' + error.message, 'error');
+            return;
+        }
+
+        // 请求配置
+        const configUrl = `${baseUrl}/config/list`;
+        showStatus('正在获取配置...', 'loading');
+        
+        const response = await fetch(configUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': authKey
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`获取配置失败: ${response.status}`);
+        }
+
+        const config = await response.json();
+        
+        if (config.aiModelProvider === 'OpenAI') {
+            // 更新UI
+            document.getElementById('modelUrl').value = config.aiApiEndpoint || '';
+            document.getElementById('apiKey').value = config.aiApiKey || '';
+            document.getElementById('modelName').value = config.aiModel || '';
+            
+            showStatus('AI配置获取成功', 'success');
+        } else {
+            showStatus('当前不支持的AI提供商: ' + config.aiModelProvider, 'error');
+        }
+    } catch (error) {
+        console.error('获取AI配置时出错:', error);
+        showStatus('获取AI配置失败: ' + error.message, 'error');
+    }
+}
+
 // 初始化事件监听器
 document.addEventListener('DOMContentLoaded', async function() {
     // 加载设置
@@ -403,6 +462,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         showStatus('设置已重置为默认值', 'success');
         setTimeout(hideStatus, 2000);
     });
+
+    // 绑定获取AI配置按钮事件
+    document.getElementById('fetchAiConfig').addEventListener('click', fetchAiConfig);
 
     // 绑定密钥显示/隐藏事件
     document.querySelectorAll('.toggle-visibility').forEach(button => {

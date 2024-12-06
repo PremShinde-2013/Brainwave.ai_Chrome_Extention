@@ -245,6 +245,22 @@
         a:hover {
             text-decoration: underline;
         }
+
+        .fetch-button {
+            padding: 8px 16px;
+            background-color: #f1f3f5;
+            color: #495057;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .fetch-button:hover {
+            background-color: #e9ecef;
+        }
     </style>
 </head>
 <body>
@@ -288,18 +304,21 @@
         <h2>设置</h2>
         <div class="input-container">
             <label for="targetUrl">Blinko API URL:</label>
-            <input type="text" id="targetUrl" class="text-input" placeholder="https://your-api-endpoint.com/save">
+            <input type="text" id="targetUrl" class="text-input" placeholder="https://your-domain/api/v1">
+            <div class="help-text">填写到/v1即可，无需填写完整路径</div>
         </div>
         
         <div class="input-container">
             <label for="authKey">Blinko认证密钥:</label>
             <input type="text" id="authKey" class="text-input sensitive-input" placeholder="your-auth-key">
             <button class="toggle-visibility" title="显示/隐藏">👁️</button>
+            <button id="fetchAiConfig" class="fetch-button">从Blinko获取AI配置</button>
         </div>
 
         <div class="input-container">
             <label for="modelUrl">OpenAI兼容接口地址:</label>
-            <input type="text" id="modelUrl" class="text-input" placeholder="https://api.openai.com/v1/chat/completions">
+            <input type="text" id="modelUrl" class="text-input" placeholder="https://api.openai.com/v1">
+            <div class="help-text">填写到/v1即可，无需填写完整路径</div>
         </div>
         
         <div class="input-container">
