@@ -9,6 +9,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         handleSaveSummary(request, sendResponse);
         return true;  // 保持消息通道开放
     }
+
+    if (request.action === "processAndSendContent") {
+        handleFloatingBallRequest(request, sendResponse);
+        return true;  // 保持消息通道开放
+    }
 });
 
 async function handleContentRequest(request, sendResponse) {
@@ -122,6 +127,36 @@ async function handleSaveSummary(request, sendResponse) {
             success: false, 
             error: error.message 
         });
+    }
+}
+
+// 处理悬浮球请求
+async function handleFloatingBallRequest(request, sendResponse) {
+    try {
+        // 获取存储的设置
+        const result = await chrome.storage.sync.get('settings');
+        const settings = result.settings;
+        
+        if (!settings) {
+            throw new Error('未找到设置信息');
+        }
+
+        // 检查必要的设置是否存在
+        if (!settings.modelUrl || !settings.apiKey || !settings.modelName) {
+            throw new Error('请先完成API设置');
+        }
+
+        // 生成总结
+        const summary = await getSummaryFromModel(request.content, settings);
+        
+        // 直接发送到服务器
+        await sendToTarget(summary, settings, request.url, 0, request.title, false);
+        
+        // 发送成功响应
+        sendResponse({ success: true });
+    } catch (error) {
+        console.error('处理悬浮球请求时出错:', error);
+        sendResponse({ success: false, error: error.message });
     }
 }
 
