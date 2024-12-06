@@ -21,7 +21,6 @@ async function handleSaveSummary(request, sendResponse) {
             throw new Error('未找到设置信息');
         }
 
-
         // 准备最终内容
         let finalContent = request.content;
 
@@ -35,7 +34,8 @@ async function handleSaveSummary(request, sendResponse) {
             settings,
             request.url,
             0,
-            request.title
+            request.title,
+            false  // 这是总结笔记场景
         );
 
         if (response.ok) {
@@ -135,15 +135,15 @@ async function getSummaryFromModel(content, settings) {
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "sendSelectedText",
-        title: "保存选中文本到Blinko",
+        title: "发送到Blinko笔记",
         contexts: ["selection"]
     });
 });
 
+// 处理右键菜单点击
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     if (info.menuItemId === "sendSelectedText") {
         try {
-            // 获取存储的设置
             const result = await chrome.storage.sync.get('settings');
             const settings = result.settings;
             
@@ -151,20 +151,13 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
                 throw new Error('未找到设置信息');
             }
 
-            // 准备最终内容
-            let finalContent = info.selectionText;
-
-            // 添加划词保存标签
-            if (settings.selectionTag) {
-                finalContent = finalContent.trim() + '\n' + settings.selectionTag;
-            }
-
             const response = await sendToTarget(
-                finalContent,
+                info.selectionText,
                 settings,
                 tab.url,
                 0,
-                tab.title
+                tab.title,
+                true  // 这是划词场景
             );
             
             if (response.ok) {
@@ -202,7 +195,7 @@ function showSuccessIcon() {
     }, 3000);
 }
 
-async function sendToTarget(content, settings, url, retryCount = 0, title = '') {
+async function sendToTarget(content, settings, url, retryCount = 0, title = '', isSelection = false) {
     if (!settings.targetUrl) {
         throw new Error('请设置目标URL');
     }
@@ -212,10 +205,9 @@ async function sendToTarget(content, settings, url, retryCount = 0, title = '') 
     }
 
     try {
-        // 根据设置决定是否添加URL
         let finalContent = content;
-        if (settings.includeUrl && url) {
-            // 直接添加URL到内容末尾
+        // 根据不同场景和设置决定是否添加URL
+        if (url && ((isSelection && settings.includeSelectionUrl) || (!isSelection && settings.includeSummaryUrl))) {
             finalContent = `${finalContent}\n\n原文链接：[${title || url}](${url})`;
         }
 
@@ -236,11 +228,9 @@ async function sendToTarget(content, settings, url, retryCount = 0, title = '') 
 
         return response;
     } catch (error) {
-        
         if (retryCount < 3) {
-            return sendToTarget(content, settings, url, retryCount + 1, title);
+            return sendToTarget(content, settings, url, retryCount + 1, title, isSelection);
         }
-        
         throw new Error(`发送失败: ${error.message}`);
     }
 }

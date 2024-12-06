@@ -23,9 +23,10 @@ const defaultSettings = {
 *   摘要的长度应适中，既要全面覆盖重要内容，又要避免冗长啰嗦。
 *   总结的末尾无需再进行总结，有一句话总结代替。
 以下是网页内容：{content}`,
-    includeUrl: true,
-    summaryTag: '#阅读/网页',  // 网页总结的标签
-    selectionTag: '#摘录'      // 划词保存的标签
+    includeSummaryUrl: true,    // 总结笔记是否包含URL
+    includeSelectionUrl: false, // 划词保存是否包含URL
+    summaryTag: '#阅读/网页',   // 网页总结的标签
+    selectionTag: '#摘录'       // 划词保存的标签
 };
 
 // 临时存储键
@@ -59,7 +60,8 @@ async function loadSettings() {
         document.getElementById('modelName').value = settings.modelName || 'gpt-3.5-turbo';
         document.getElementById('temperature').value = settings.temperature || '0.7';
         document.getElementById('promptTemplate').value = settings.promptTemplate || defaultSettings.promptTemplate;
-        document.getElementById('includeUrl').checked = settings.includeUrl !== false;
+        document.getElementById('includeSummaryUrl').checked = settings.includeSummaryUrl !== false;
+        document.getElementById('includeSelectionUrl').checked = settings.includeSelectionUrl !== false;
         document.getElementById('summaryTag').value = settings.summaryTag || defaultSettings.summaryTag;
         document.getElementById('selectionTag').value = settings.selectionTag || defaultSettings.selectionTag;
         
@@ -82,7 +84,8 @@ async function saveSettings() {
             modelName: document.getElementById('modelName').value.trim(),
             temperature: parseFloat(document.getElementById('temperature').value) || 0.7,
             promptTemplate: document.getElementById('promptTemplate').value.trim() || defaultSettings.promptTemplate,
-            includeUrl: document.getElementById('includeUrl').checked,
+            includeSummaryUrl: document.getElementById('includeSummaryUrl').checked,
+            includeSelectionUrl: document.getElementById('includeSelectionUrl').checked,
             summaryTag: document.getElementById('summaryTag').value.trim(),
             selectionTag: document.getElementById('selectionTag').value.trim()
         };
@@ -113,7 +116,8 @@ async function resetSettings() {
         document.getElementById('modelName').value = settings.modelName;
         document.getElementById('temperature').value = settings.temperature;
         document.getElementById('promptTemplate').value = settings.promptTemplate;
-        document.getElementById('includeUrl').checked = settings.includeUrl;
+        document.getElementById('includeSummaryUrl').checked = settings.includeSummaryUrl;
+        document.getElementById('includeSelectionUrl').checked = settings.includeSelectionUrl;
         document.getElementById('summaryTag').value = settings.summaryTag;
         document.getElementById('selectionTag').value = settings.selectionTag;
         
@@ -230,7 +234,7 @@ async function saveSummary() {
         let summaryText = document.getElementById('summaryText').value;
         console.log('准备发送的内容:', {  
             summaryText,
-            url: settings.includeUrl ? summaryData.url : undefined,
+            url: settings.includeSummaryUrl ? summaryData.url : undefined,
             title: summaryData.title,
             tag: settings.summaryTag
         });
@@ -238,7 +242,7 @@ async function saveSummary() {
         chrome.runtime.sendMessage({
             action: 'saveSummary',
             content: summaryText,
-            url: settings.includeUrl ? summaryData.url : undefined,
+            url: settings.includeSummaryUrl ? summaryData.url : undefined,
             title: summaryData.title,
             tag: settings.summaryTag, 
             isSelection: false
