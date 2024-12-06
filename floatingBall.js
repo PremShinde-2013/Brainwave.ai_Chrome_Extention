@@ -1,5 +1,12 @@
 // 创建并初始化悬浮球
-function createFloatingBall() {
+async function createFloatingBall() {
+    // 检查是否启用悬浮球
+    const result = await chrome.storage.sync.get('settings');
+    const settings = result.settings || {};
+    if (settings.enableFloatingBall === false) {
+        return;
+    }
+
     const ball = document.createElement('div');
     ball.id = 'blinko-floating-ball';
     ball.innerHTML = `
@@ -14,8 +21,8 @@ function createFloatingBall() {
     style.textContent = `
         #blinko-floating-ball {
             position: fixed;
-            width: 50px;
-            height: 50px;
+            width: min(50px, 5vw);
+            height: min(50px, 5vw);
             cursor: move;
             z-index: 10000;
             user-select: none;
@@ -35,8 +42,8 @@ function createFloatingBall() {
         }
 
         .ball-icon img {
-            width: 30px;
-            height: 30px;
+            width: 60%;
+            height: 60%;
             transition: transform 0.5s ease;
         }
 
@@ -64,6 +71,13 @@ function createFloatingBall() {
 
         .success .ball-icon img {
             transform: rotateY(180deg);
+        }
+
+        @media (max-width: 768px) {
+            #blinko-floating-ball {
+                width: min(40px, 8vw);
+                height: min(40px, 8vw);
+            }
         }
     `;
     document.head.appendChild(style);
@@ -165,6 +179,22 @@ function createFloatingBall() {
         }
     });
 }
+
+// 监听来自popup的消息
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'updateFloatingBallState') {
+        const ball = document.getElementById('blinko-floating-ball');
+        if (request.enabled) {
+            if (!ball) {
+                createFloatingBall();
+            }
+        } else {
+            if (ball) {
+                ball.remove();
+            }
+        }
+    }
+});
 
 // 初始化悬浮球
 createFloatingBall();

@@ -7,16 +7,16 @@ const defaultSettings = {
     modelName: 'gpt-4o-mini',
     temperature: 0.5,
     promptTemplate: `请你根据提供的网页内容，撰写一份结构清晰、重点突出且不遗漏重要内容的摘要。
-
+    
 要求：
 1. **摘要结构：**  
     *   第一行使用'# 标题'格式取一个简要的大标题。
     *   一句话总结：请提供一个简洁、精炼的概括性语句，准确概括整个网页的核心内容。
     *   按照网页内容的逻辑顺序，依次总结各个主要部分的核心内容。
-
+    
 2. **突出重点：**  请识别并突出显示网页中的关键信息、主题、重要论点和结论。如果网页内容包含重要数据或结论，请务必在摘要中体现。
 3. **不遗漏重要内容：**  在总结时，请确保覆盖网页的所有重要方面，避免关键信息缺失。
-
+    
 请注意：
 *   摘要应保持客观中立，避免掺杂个人观点或情感色彩。
 *   摘要的语言应简洁明了，避免使用过于专业或晦涩的词汇。
@@ -26,7 +26,8 @@ const defaultSettings = {
     includeSummaryUrl: true,    // 总结笔记是否包含URL
     includeSelectionUrl: false, // 划词保存是否包含URL
     summaryTag: '#阅读/网页',   // 网页总结的标签
-    selectionTag: '#摘录'       // 划词保存的标签
+    selectionTag: '#摘录',      // 划词保存的标签
+    enableFloatingBall: true    // 是否启用悬浮球
 };
 
 // 临时存储键
@@ -65,6 +66,7 @@ async function loadSettings() {
         document.getElementById('includeSelectionUrl').checked = settings.includeSelectionUrl !== false;
         document.getElementById('summaryTag').value = settings.summaryTag || defaultSettings.summaryTag;
         document.getElementById('selectionTag').value = settings.selectionTag || defaultSettings.selectionTag;
+        document.getElementById('enableFloatingBall').checked = settings.enableFloatingBall !== false;
         
         return settings;
     } catch (error) {
@@ -88,11 +90,26 @@ async function saveSettings() {
             includeSummaryUrl: document.getElementById('includeSummaryUrl').checked,
             includeSelectionUrl: document.getElementById('includeSelectionUrl').checked,
             summaryTag: document.getElementById('summaryTag').value.trim(),
-            selectionTag: document.getElementById('selectionTag').value.trim()
+            selectionTag: document.getElementById('selectionTag').value.trim(),
+            enableFloatingBall: document.getElementById('enableFloatingBall').checked
         };
 
         // 保存到chrome.storage
         await chrome.storage.sync.set({ settings });
+        
+        // 通知所有标签页更新悬浮球状态
+        const tabs = await chrome.tabs.query({});
+        for (const tab of tabs) {
+            try {
+                await chrome.tabs.sendMessage(tab.id, {
+                    action: 'updateFloatingBallState',
+                    enabled: settings.enableFloatingBall
+                });
+            } catch (error) {
+                console.log('Tab not ready:', tab.id);
+            }
+        }
+
         console.log('设置已保存:', settings);
         showStatus('设置已保存', 'success');
         return settings;
@@ -121,6 +138,7 @@ async function resetSettings() {
         document.getElementById('includeSelectionUrl').checked = settings.includeSelectionUrl;
         document.getElementById('summaryTag').value = settings.summaryTag;
         document.getElementById('selectionTag').value = settings.selectionTag;
+        document.getElementById('enableFloatingBall').checked = settings.enableFloatingBall;
         
         console.log('设置已重置为默认值:', settings);
         showStatus('设置已重置为默认值', 'success');
