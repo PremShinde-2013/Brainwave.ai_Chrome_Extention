@@ -437,7 +437,20 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (!tab) {
                 throw new Error('无法获取当前标签页');
             }
-            chrome.tabs.sendMessage(tab.id, { action: 'getContent' });
+            chrome.tabs.sendMessage(tab.id, { action: 'getContent' }, response => {
+                if (response.success) {
+                    showStatus('正在生成总结...', 'loading');
+                    // 发送到background进行总结
+                    chrome.runtime.sendMessage({
+                        action: "getContent",
+                        content: response.content,
+                        url: response.url,
+                        title: response.title
+                    });
+                } else {
+                    showStatus('获取页面内容失败: ' + response.error, 'error');
+                }
+            });
         } catch (error) {
             showStatus('获取页面内容失败: ' + error.message, 'error');
         }
@@ -485,23 +498,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 
-    // 监听来自content script和background的消息
+    // 监听来自background的消息
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'handleSummaryResponse') {
             handleSummaryResponse(request);
-        } else if (request.action === 'getContent') {
-            if (request.error) {
-                showStatus('获取页面内容失败: ' + request.error, 'error');
-            } else {
-                showStatus('正在生成总结...', 'loading');
-                // 发送到background进行总结
-                chrome.runtime.sendMessage({
-                    action: "getContent",
-                    content: request.content,
-                    url: request.url,
-                    title: request.title
-                });
-            }
         }
     });
 

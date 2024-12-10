@@ -20,16 +20,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         try {
             const content = extractPageContent();
             console.log('提取的内容长度:', content.length);
-            chrome.runtime.sendMessage({
-                action: "getContent",
+            sendResponse({
+                success: true,
                 content: content,
                 url: window.location.href,
                 title: document.title
             });
         } catch (error) {
             console.error('提取内容时出错:', error);
-            chrome.runtime.sendMessage({
-                action: "getContent",
+            sendResponse({
                 success: false,
                 error: error.message
             });
