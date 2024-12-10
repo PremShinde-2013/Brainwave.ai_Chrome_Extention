@@ -1,6 +1,7 @@
 # Blinko Chrome Extension 🚀
 
-[中文文档](README_CN.md)
+[中文文档](README_CN.md)  
+[Chrome商店](https://chrome.google.com/webstore/detail/gpdobkhkjbgbgllpkhaomajicoaccjjo) 感谢 @Jonnyan404 帮助上架
 
 A Chrome extension for Blinko that automatically extracts and summarizes web content using AI. Supports custom summary templates and saves content to specified Blinko servers.
 
