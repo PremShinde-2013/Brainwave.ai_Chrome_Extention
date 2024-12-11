@@ -202,7 +202,7 @@ async function sendToBlinko(content, url, title) {
         }
 
         // 构建请求URL，确保不重复添加v1
-        const baseUrl = settings.targetUrl.replace(/\/+$/, ''); // 移除末尾的斜杠
+        const baseUrl = settings.targetUrl.replace(/\/+$/, ''); // 移除末���的斜杠
         const requestUrl = `${baseUrl}/note/upsert`;
 
         // 发送请求
@@ -294,7 +294,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
             if (response.success) {
                 // 通知用户保存成功
                 chrome.action.setIcon({
-                    path: "images/icon128_success_reverse.png"
+                    path: "images/icon128_success.png"
                 });
                 setTimeout(() => {
                     chrome.action.setIcon({

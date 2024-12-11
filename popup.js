@@ -19,16 +19,16 @@ const defaultSettings = {
     
 请注意：
 *   摘要应保持客观中立，避免掺杂个人观点或情感色彩。
-*   摘要的语言应简洁明了，避免使用过于专业或晦涩的词汇。
-*   摘要的长度应适中，既要全面覆盖重要内容，又要避免冗长啰嗦。
+*   摘要的语言应简洁明了，避免使用过于专业或晦涩的词汇,并使用中文进行总结。
+*   摘要的度应适中，既要全面覆盖重要内容，又要避免冗长啰嗦。
 *   总结的末尾无需再进行总结，有一句话总结代替。
 以下是网页内容：{content}`,
     includeSummaryUrl: true,    // 总结笔记是否包含URL
     includeSelectionUrl: false, // 划词保存是否包含URL
     includeImageUrl: true,     // 图片保存是否包含URL
-    summaryTag: '#阅读/网页',   // 网页总结的标签
-    selectionTag: '#摘录',      // 划词保存的标签
-    imageTag: '#图片',         // 图片保存的标签
+    summaryTag: '#网页/总结',   // 网页总结的标签
+    selectionTag: '#网页/摘录',      // 划词保存的标签
+    imageTag: '#网页/图片',         // 图片保存的标签
     enableFloatingBall: true    // 是否启用悬浮球
 };
 
@@ -227,6 +227,14 @@ async function loadTempSummaryData() {
         console.error('加载临时数据失败:', error);
         return null;
     }
+}
+
+// 清空总结预览内容
+function clearSummaryPreview() {
+    // 只清空内容，不隐藏预览框
+    document.getElementById('summaryText').value = '';
+    document.getElementById('pageTitle').textContent = '';
+    document.getElementById('pageUrl').textContent = '';
 }
 
 // 显示总结预览
@@ -465,9 +473,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // 绑定总结预览相关事件
     document.getElementById('editSummary').addEventListener('click', saveSummary);
-    document.getElementById('cancelEdit').addEventListener('click', () => {
-        hideSummaryPreview();
-        clearTempSummaryData();
+    document.getElementById('cancelEdit').addEventListener('click', async () => {
+        clearSummaryPreview();
+        await clearTempSummaryData();
     });
 
     // 绑定设置相关事件
