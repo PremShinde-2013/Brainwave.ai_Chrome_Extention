@@ -1,60 +1,62 @@
 # Blinko Chrome Extension 🚀
 
-[中文文档](README_CN.md)  
-[Chrome商店](https://chrome.google.com/webstore/detail/gpdobkhkjbgbgllpkhaomajicoaccjjo) 感谢 @Jonnyan404 帮助上架
+[中文](README_CN.md)
 
-A Chrome extension for Blinko that automatically extracts and summarizes web content using AI. Supports custom summary templates and saves content to specified Blinko servers.
+A Chrome extension for Blinko that uses AI to automatically extract and summarize web content. Supports custom summary templates and can save content to a specified Blinko server.
 
 Original Project: [Blinko](https://github.com/blinko-space/blinko) 🔗
 
 ## ✨ Features
 
-- 🤖 One-click extraction and summarization of current webpage content to Blinko
-- 🎯 Customizable AI models and parameters
+- 🤖 One-click web content extraction and summarization, save to Blinko
+- 🎯 Customizable AI model and parameters
 - 📝 Configurable summary prompt templates
-- 🔗 Optional inclusion of source links
+- 🔗 Optional inclusion of source URLs
 - ✂️ Right-click menu to send selected text to Blinko
-- 📌 Quick note feature for instant thoughts
-- 🏷️ Custom tags for summaries and selections
-- 💾 Temporary content saving to prevent accidental loss
+- 📌️ Right-click to save web images to Blinko
+- 📌 Quick note feature for instant thoughts capture
+- 🏷️ Custom tags for summaries, selections, and images
+- 💾 Temporary content storage to prevent loss on accidental closure
 - 🎨 Modern UI design for smooth operation
+- 🔔 Smart notification system for timely processing results
 
 ## 🔧 Installation
 
-1. Download the source code of this extension
-2. Open Chrome browser and go to the extensions management page (chrome://extensions/)
-3. Enable "Developer mode" in the top right corner
-4. Click "Load unpacked"
-5. Select the directory of this extension
+1. Download the extension source code
+2. Open Chrome browser and go to extensions page (chrome://extensions/)
+3. Enable "Developer mode" in the top right
+4. Click "Load unpacked extension"
+5. Select the extension directory
 
 ## 📖 User Guide
 
 ### ⚙️ Basic Configuration
 
-Before first use, configure the following information on the extension's settings page:
+Before first use, configure the following in the extension settings:
 
 1. **Blinko API Configuration** 🎯
-   - API URL: Fill in /v1 (e.g., https://your-domain/api/v1)
-   - Authentication Key: The key required to access the Blinko API
-   - One-click AI Configuration: Click the "Get AI Configuration from Blinko" button to automatically retrieve AI-related settings
+   - API URL: Fill up to /v1 (e.g., https://your-domain/api/v1)
+   - Auth Key: Authentication key for accessing Blinko API
+   - One-click AI config: Click "Get AI Config from Blinko" to auto-fetch AI settings
 
 2. **AI Model Configuration** 🤖
-   - Model URL: The API address of the AI service (fill in /v1)
-   - API Key: The key required to access the AI service
-   - Model Name: The AI model to use (default: gpt-4o-mini)
-   - Temperature Parameter: Controls the randomness of the output (default: 0.5)
+   - Model URL: AI service API address (fill up to /v1)
+   - API Key: Key for accessing AI service
+   - Model Name: AI model to use (default: gpt-4o-mini)
+   - Temperature: Controls output randomness (default: 0.5)
 
 ### 🚀 Usage
 
-#### Summarize Entire Webpage 📄
+#### Summarize Entire Page 📄
 
-1. Click the extension icon on the webpage you want to summarize
-2. Click the "Extract" button
-3. Wait for the AI to generate the summary
-4. Review the summary content and make edits if necessary
-5. Click "Save" to send the summary to the target server
+1. Click the extension icon on the page you want to summarize
+2. Click "Extract and Summarize Page Content"
+3. Wait for AI to generate summary
+4. Review and edit the summary content
+5. Click "Edit and Save" to send to target server
+6. You'll receive a system notification when summary is complete
 
-#### Quick Note ✏️
+#### Quick Notes ✏️
 
 1. Click the extension icon
 2. Enter content in the quick note box
@@ -63,64 +65,80 @@ Before first use, configure the following information on the extension's setting
 #### Summarize Selected Text ✂️
 
 1. Select text on the webpage
-2. Right-click and choose "Send to Blinko Note"
-3. The content will be automatically sent to the target server
+2. Right-click and choose "Send to Blinko Notes"
+3. Content will be automatically sent to target server
+
+#### Save Web Images 🖼️
+
+1. Right-click on any web image
+2. Select "Save Image to Blinko"
+3. Image link will be saved in Markdown format
+4. Option to include original page link
 
 ### 🛠️ Custom Settings
 
-#### Prompt Templates 📝
+#### Prompt Template 📝
 
-You can customize the summary prompt templates using `{content}` as a placeholder for the webpage content. The default template provides a structured summary format, including:
-- Title and theme overview
+Customize summary prompt template using `{content}` as placeholder for web content. Default template provides structured summary format including:
+- Title and topic overview
 - Core content summary
 - Key information extraction
 - One-sentence summary
 
 #### Tag Settings 🏷️
 
-- **Summary Tags**: Add default tags to webpage summaries (e.g., #reading/webpage)
-- **Selection Tags**: Add default tags to selected text (e.g., #excerpt)
+- **Summary Tag**: Default tag for page summaries (e.g., #web/summary)
+- **Selection Tag**: Default tag for selected text (e.g., #web/excerpt)
+- **Image Tag**: Default tag for saved images (e.g., #web/image)
 
-#### URL Inclusion Options 🔗
+#### URL Include Options 🔗
 
-You can set whether to include the source link in webpage summaries and selections. When enabled, the link will be added to the content in Markdown format.
+Configure whether to include source URLs for page summaries, text selections, and image saves. When enabled, links are added in Markdown format.
 
 ## ❗ Troubleshooting
 
-1. **Unable to Extract Content** 🚫
-   - Ensure the webpage is fully loaded
-   - Check if necessary permissions are granted
-   - Look for error messages in the console
+1. **Cannot Extract Content** 🚫
+   - Ensure page is fully loaded
+   - Check for necessary permissions
+   - Look for errors in console
 
-2. **AI Service Unresponsive** 🤖
-   - Verify the API key is correct
-   - Check if the model URL is accessible
-   - Confirm if the API usage limit is exceeded
+2. **AI Service Not Responding** 🤖
+   - Verify API key is correct
+   - Check model URL accessibility
+   - Confirm API usage limits
 
 3. **Save Failed** ❌
-   - Ensure the target URL is correct
-   - Verify the authentication key is valid
-   - Check the network connection status
+   - Confirm target URL is correct
+   - Verify auth key is valid
+   - Check network connection
 
 ## 🔄 Changelog
 
+### v1.5.0
+- ✨ Added right-click save web images feature
+- 🔔 Enhanced notification system for summary completion
+- 💾 Improved content persistence storage
+- 🎨 Enhanced UI interaction experience
+- 🛠️ Fixed summary content save and cancel functionality
+- 🐛 Fixed multiple stability issues
+
 ### v1.2.0
-- ✨ Optimized URL configuration, now only need to fill in /v1
-- 🔄 Support for automatically retrieving AI configuration from Blinko
-- 🎨 Improved user prompts in the settings interface
+- ✨ Optimized URL configuration, now only need to fill up to /v1
+- 🔄 Added support for auto-fetching AI config from Blinko
+- 🎨 Improved settings interface prompts
 - 🛠️ Optimized URL handling logic
-- 🐛 Enhanced user experience in the configuration process
-- 🎈 Added floating action button for one-click webpage summarization
+- 🐛 Enhanced configuration process UX
+- 🎈 Added floating ball feature for one-click web summary upload
 
 ### v1.1.0
 - ✨ Added quick note feature
-- 🔄 Optimized temporary saving mechanism for summary content
-- 🎨 Brand new modern UI design
-- 🏷️ Support for custom tags
+- 🔄 Optimized temporary content storage
+- 🎨 New modern UI design
+- 🏷️ Added custom tag support
 - 🐛 Fixed multiple known issues
 
 ### v1.0.0
 - 🚀 Initial release
-- 📄 Support for webpage content summarization
-- ✂️ Support for saving selected text
-- ⚙️ Support for custom settings
+- 📄 Web content summarization
+- ✂️ Text selection save
+- ⚙️ Custom settings support
