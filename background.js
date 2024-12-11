@@ -1,3 +1,11 @@
+// 存储全局总结状态
+let summaryState = {
+    status: 'none',
+    summary: null,
+    url: null,
+    title: null
+};
+
 // 监听来自popup和content script的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getContent") {
@@ -14,10 +22,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         handleFloatingBallRequest(request, sendResponse);
         return true;  // 保持消息通道开放
     }
+
+    if (request.action === "getSummaryState") {
+        // 返回全局状态
+        sendResponse(summaryState);
+        return true;
+    }
+
+    if (request.action === "clearSummary") {
+        summaryState = {
+            status: 'none',
+            summary: null,
+            url: null,
+            title: null
+        };
+        // 同时清除存储的内容
+        chrome.storage.local.remove('currentSummary');
+        sendResponse({ success: true });
+        return true;
+    }
 });
 
 async function handleContentRequest(request, sendResponse) {
     try {
+        // 更新状态为处理中
+        summaryState = {
+            status: 'processing',
+            url: request.url,
+            title: request.title
+        };
+
         // 获取存储的设置
         const result = await chrome.storage.sync.get('settings');
         const settings = result.settings;
@@ -34,20 +68,72 @@ async function handleContentRequest(request, sendResponse) {
         // 生成总结
         const summary = await getSummaryFromModel(request.content, settings);
         
-        // 发送总结结果回popup
-        chrome.runtime.sendMessage({
-            action: 'handleSummaryResponse',
-            success: true,
+        // 更新状态为完成
+        summaryState = {
+            status: 'completed',
             summary: summary,
             url: request.url,
             title: request.title
+        };
+
+        // 保存到storage
+        await chrome.storage.local.set({
+            currentSummary: {
+                summary: summary,
+                url: request.url,
+                title: request.title,
+                timestamp: Date.now()
+            }
         });
+
+        // 发送总结结果回popup
+        try {
+            await chrome.runtime.sendMessage({
+                action: 'handleSummaryResponse',
+                success: true,
+                summary: summary,
+                url: request.url,
+                title: request.title
+            });
+        } catch (error) {
+            console.log('Popup可能已关闭，发送消息失败');
+        }
+
+        // 总是显示通知
+        chrome.notifications.create({
+            type: 'basic',
+            iconUrl: 'images/icon128.png',
+            title: '总结完成',
+            message: `已完成对"${request.title}"的内容总结`
+        });
+
     } catch (error) {
         console.error('处理内容请求时出错:', error);
-        chrome.runtime.sendMessage({
-            action: 'handleSummaryResponse',
-            success: false,
-            error: error.message
+        // 更新状态为错误
+        summaryState = {
+            status: 'error',
+            error: error.message,
+            url: request.url,
+            title: request.title
+        };
+
+        // 尝试发送错误消息到popup
+        try {
+            await chrome.runtime.sendMessage({
+                action: 'handleSummaryResponse',
+                success: false,
+                error: error.message
+            });
+        } catch (error) {
+            console.log('Popup可能已关闭，发送错误消息失败');
+        }
+
+        // 总是显示错误通知
+        chrome.notifications.create({
+            type: 'basic',
+            iconUrl: 'images/icon128.png',
+            title: '总结失败',
+            message: `总结"${request.title}"时出错: ${error.message}`
         });
     }
 }
@@ -82,7 +168,7 @@ async function getSummaryFromModel(content, settings) {
 
         const data = await response.json();
         if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-            throw new Error('API返回格式错误');
+            throw new Error('API返回式错误');
         }
 
         return data.choices[0].message.content.trim();
@@ -102,30 +188,57 @@ async function handleSaveSummary(request, sendResponse) {
             throw new Error('未找到设置信息');
         }
 
+        // 获取当前总结内容
+        const currentSummary = await chrome.storage.local.get('currentSummary');
+        if (!currentSummary.currentSummary || !currentSummary.currentSummary.summary) {
+            throw new Error('没有可保存的内容');
+        }
+
         // 准备最终内容
-        let finalContent = request.content;
+        let finalContent = currentSummary.currentSummary.summary;
 
-        // 如果有标签，添加到内容末尾
-        if (request.tag) {
-            finalContent = finalContent.trim() + '\n' + request.tag;
+        // 如果设置中选择包含URL，则添加原网页链接
+        if (settings.includeSummaryUrl && currentSummary.currentSummary.url) {
+            finalContent = `${finalContent}\n\n原文链接：[${currentSummary.currentSummary.title || currentSummary.currentSummary.url}](${currentSummary.currentSummary.url})`;
         }
 
-        const response = await sendToTarget(
-            finalContent,
-            settings,
-            request.url,
-            0,
-            request.title,
-            false  // 这是总结笔记场景
-        );
-
-        if (response.ok) {
-            showSuccessIcon();
-            sendResponse({ success: true });
-        } else {
-            throw new Error(`服务器返回状态码: ${response.status}`);
+        // 添加总结标签
+        if (settings.summaryTag) {
+            finalContent = `${finalContent}\n\n${settings.summaryTag}`;
         }
+
+        // 获取完整的API URL
+        const fullUrl = getFullApiUrl(settings.targetUrl, '/note/upsert');
+
+        const response = await fetch(fullUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': settings.authKey
+            },
+            body: JSON.stringify({
+                content: finalContent
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`保存失败: ${response.status}`);
+        }
+
+        // 保存成功后清除存储的内容
+        await chrome.storage.local.remove('currentSummary');
+        // 清除状态
+        summaryState = {
+            status: 'none',
+            summary: null,
+            url: null,
+            title: null
+        };
+
+        sendResponse({ success: true });
+
     } catch (error) {
+        console.error('保存总结时出错:', error);
         sendResponse({ 
             success: false, 
             error: error.message 
@@ -202,7 +315,7 @@ async function sendToBlinko(content, url, title) {
         }
 
         // 构建请求URL，确保不重复添加v1
-        const baseUrl = settings.targetUrl.replace(/\/+$/, ''); // 移除末���的斜杠
+        const baseUrl = settings.targetUrl.replace(/\/+$/, ''); // 移除末尾的斜杠
         const requestUrl = `${baseUrl}/note/upsert`;
 
         // 发送请求

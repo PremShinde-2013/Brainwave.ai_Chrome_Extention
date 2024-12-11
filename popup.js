@@ -20,7 +20,7 @@ const defaultSettings = {
 请注意：
 *   摘要应保持客观中立，避免掺杂个人观点或情感色彩。
 *   摘要的语言应简洁明了，避免使用过于专业或晦涩的词汇,并使用中文进行总结。
-*   摘要的度应适中，既要全面覆盖重要内容，又要避免冗长啰嗦。
+*   摘要的适中，既要全面覆盖重要内容，又要避免冗长啰嗦。
 *   总结的末尾无需再进行总结，有一句话总结代替。
 以下是网页内容：{content}`,
     includeSummaryUrl: true,    // 总结笔记是否包含URL
@@ -231,10 +231,23 @@ async function loadTempSummaryData() {
 
 // 清空总结预览内容
 function clearSummaryPreview() {
-    // 只清空内容，不隐藏预览框
-    document.getElementById('summaryText').value = '';
-    document.getElementById('pageTitle').textContent = '';
-    document.getElementById('pageUrl').textContent = '';
+    const summaryPreview = document.getElementById('summaryPreview');
+    const summaryText = document.getElementById('summaryText');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageUrl = document.getElementById('pageUrl');
+
+    if (summaryPreview) {
+        summaryPreview.style.display = 'none';
+    }
+    if (summaryText) {
+        summaryText.value = '';
+    }
+    if (pageTitle) {
+        pageTitle.textContent = '';
+    }
+    if (pageUrl) {
+        pageUrl.textContent = '';
+    }
 }
 
 // 显示总结预览
@@ -252,7 +265,7 @@ async function showSummaryPreview() {
     }
 }
 
-// 处理总结响应
+// 处理总结��应
 async function handleSummaryResponse(response) {
     if (response.success) {
         const settings = await loadSettings();
@@ -394,7 +407,7 @@ async function fetchAiConfig() {
         }
 
         // 构建请求URL，确保不重复添加v1
-        const baseUrl = targetUrl.replace(/\/+$/, ''); // 移除末尾的斜杠
+        const baseUrl = targetUrl.replace(/\/+$/, ''); // 移除���尾的斜杠
         const configUrl = `${baseUrl}/config/list`;
 
         showStatus('正在获取配置...', 'loading');
@@ -428,10 +441,85 @@ async function fetchAiConfig() {
     }
 }
 
+// 检查后台总结状态
+async function checkSummaryState() {
+    try {
+        // 首先尝试从storage获取保存的总结
+        const currentSummary = await chrome.storage.local.get('currentSummary');
+        const response = await chrome.runtime.sendMessage({ action: "getSummaryState" });
+        
+        const summaryPreview = document.getElementById('summaryPreview');
+        const summaryText = document.getElementById('summaryText');
+        const pageTitle = document.getElementById('pageTitle');
+        const pageUrl = document.getElementById('pageUrl');
+        const extractBtn = document.getElementById('extract');
+        const cancelBtn = document.getElementById('cancelEdit');
+        const editSummaryBtn = document.getElementById('editSummary');
+
+        // 确保所有元素都存在
+        if (!summaryPreview || !summaryText || !pageTitle || !pageUrl || !extractBtn || !cancelBtn || !editSummaryBtn) {
+            console.error('找不到必要的DOM元素');
+            return;
+        }
+
+        // 如果有已保存的总结，显示它
+        if (currentSummary.currentSummary && currentSummary.currentSummary.summary) {
+            summaryPreview.style.display = 'block';
+            summaryText.value = currentSummary.currentSummary.summary;
+            pageTitle.textContent = currentSummary.currentSummary.title || '';
+            pageUrl.textContent = currentSummary.currentSummary.url || '';
+            extractBtn.textContent = '重新生成';
+            extractBtn.disabled = false;
+            return;
+        }
+
+        // 否则根据状态显示
+        if (response) {
+            switch (response.status) {
+                case 'completed':
+                    // 显示已完成的总结
+                    summaryPreview.style.display = 'block';
+                    summaryText.value = response.summary;
+                    pageTitle.textContent = response.title || '';
+                    pageUrl.textContent = response.url || '';
+                    extractBtn.textContent = '重新生成';
+                    extractBtn.disabled = false;
+                    break;
+                case 'processing':
+                    // 显示处理中状态
+                    summaryPreview.style.display = 'block';
+                    summaryText.value = '正在生成总结，请稍候...';
+                    pageTitle.textContent = response.title || '';
+                    pageUrl.textContent = response.url || '';
+                    extractBtn.textContent = '处理中...';
+                    extractBtn.disabled = true;
+                    break;
+                case 'error':
+                    // 显示错误状态
+                    showStatus(response.error, 'error');
+                    extractBtn.textContent = '重新生成';
+                    extractBtn.disabled = false;
+                    break;
+                case 'none':
+                    // 重置为初始状态
+                    extractBtn.textContent = '提取并总结页面内容';
+                    extractBtn.disabled = false;
+                    clearSummaryPreview();
+                    break;
+            }
+        }
+    } catch (error) {
+        console.error('检查总结状态时出错:', error);
+    }
+}
+
 // 初始化事件监听器
 document.addEventListener('DOMContentLoaded', async function() {
     // 加载设置
     await loadSettings();
+    
+    // 检查总结状态
+    await checkSummaryState();
     
     // 加载快捷记录内容
     await loadQuickNote();
@@ -524,5 +612,102 @@ document.addEventListener('DOMContentLoaded', async function() {
     const tempData = await loadTempSummaryData();
     if (tempData && tempData.summary) {
         await showSummaryPreview();
+    }
+});
+
+// 在popup打开时检查总结状态
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // 加载设置
+        await loadSettings();
+        
+        // 检查总结状态
+        await checkSummaryState();
+        
+        // 绑定事件监听器
+        const extractBtn = document.getElementById('extract');
+        const cancelBtn = document.getElementById('cancelEdit');
+        const editSummaryBtn = document.getElementById('editSummary');
+
+        if (extractBtn) {
+            extractBtn.addEventListener('click', async () => {
+                try {
+                    // 获取当前标签页
+                    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                    if (!tab) {
+                        throw new Error('无法获取当前标签页');
+                    }
+
+                    // 更新按钮状态
+                    extractBtn.textContent = '处理中...';
+                    extractBtn.disabled = true;
+
+                    // 发送消息到content script
+                    chrome.tabs.sendMessage(tab.id, { action: "getContent" });
+                } catch (error) {
+                    console.error('生成总结时出错:', error);
+                    showStatus(error.message, 'error');
+                }
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', async () => {
+                try {
+                    // 清除后台状态
+                    await chrome.runtime.sendMessage({ action: "clearSummary" });
+                    // 清除UI显示
+                    clearSummaryPreview();
+                    // 重置提取按钮
+                    const extractBtn = document.getElementById('extract');
+                    if (extractBtn) {
+                        extractBtn.textContent = '提取并总结页面内容';
+                        extractBtn.disabled = false;
+                    }
+                } catch (error) {
+                    console.error('取消总结时出错:', error);
+                    showStatus(error.message, 'error');
+                }
+            });
+        }
+
+        if (editSummaryBtn) {
+            editSummaryBtn.addEventListener('click', async () => {
+                try {
+                    const response = await chrome.runtime.sendMessage({ action: "saveSummary" });
+                    if (response.success) {
+                        // 保存成功后清除UI显示
+                        clearSummaryPreview();
+                        // 重置提取按钮
+                        if (extractBtn) {
+                            extractBtn.textContent = '提取并总结页面内容';
+                            extractBtn.disabled = false;
+                        }
+                        showStatus('保存成功', 'success');
+                    } else {
+                        throw new Error(response.error || '保存失败');
+                    }
+                } catch (error) {
+                    console.error('保存总结时出错:', error);
+                    showStatus(error.message, 'error');
+                }
+            });
+        }
+    } catch (error) {
+        console.error('初始化popup时出错:', error);
+    }
+});
+
+// 监听popup关闭事件
+window.addEventListener('unload', () => {
+    // 通知background.js popup已关闭
+    chrome.runtime.sendMessage({ action: "popupClosed" });
+});
+
+// 监听来自background的消息
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'handleSummaryResponse') {
+        // 更新总结状态显示
+        checkSummaryState();
     }
 });
