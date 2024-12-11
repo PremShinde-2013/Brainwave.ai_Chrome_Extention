@@ -25,8 +25,10 @@ const defaultSettings = {
 以下是网页内容：{content}`,
     includeSummaryUrl: true,    // 总结笔记是否包含URL
     includeSelectionUrl: false, // 划词保存是否包含URL
+    includeImageUrl: true,     // 图片保存是否包含URL
     summaryTag: '#阅读/网页',   // 网页总结的标签
     selectionTag: '#摘录',      // 划词保存的标签
+    imageTag: '#图片',         // 图片保存的标签
     enableFloatingBall: true    // 是否启用悬浮球
 };
 
@@ -54,19 +56,35 @@ async function loadSettings() {
 
         console.log('加载的设置:', settings);
         
-        // 更新UI
-        document.getElementById('targetUrl').value = settings.targetUrl || '';
-        document.getElementById('authKey').value = settings.authKey || '';
-        document.getElementById('modelUrl').value = settings.modelUrl || '';
-        document.getElementById('apiKey').value = settings.apiKey || '';
-        document.getElementById('modelName').value = settings.modelName || 'gpt-3.5-turbo';
-        document.getElementById('temperature').value = settings.temperature || '0.7';
-        document.getElementById('promptTemplate').value = settings.promptTemplate || defaultSettings.promptTemplate;
-        document.getElementById('includeSummaryUrl').checked = settings.includeSummaryUrl !== false;
-        document.getElementById('includeSelectionUrl').checked = settings.includeSelectionUrl !== false;
-        document.getElementById('summaryTag').value = settings.summaryTag || defaultSettings.summaryTag;
-        document.getElementById('selectionTag').value = settings.selectionTag || defaultSettings.selectionTag;
-        document.getElementById('enableFloatingBall').checked = settings.enableFloatingBall !== false;
+        // 更新UI，确保元素存在
+        const elements = {
+            'targetUrl': settings.targetUrl || '',
+            'authKey': settings.authKey || '',
+            'modelUrl': settings.modelUrl || '',
+            'apiKey': settings.apiKey || '',
+            'modelName': settings.modelName || 'gpt-3.5-turbo',
+            'temperature': settings.temperature || '0.7',
+            'promptTemplate': settings.promptTemplate || defaultSettings.promptTemplate,
+            'includeSummaryUrl': settings.includeSummaryUrl !== false,
+            'includeSelectionUrl': settings.includeSelectionUrl !== false,
+            'includeImageUrl': settings.includeImageUrl !== false,
+            'summaryTag': settings.summaryTag || defaultSettings.summaryTag,
+            'selectionTag': settings.selectionTag || defaultSettings.selectionTag,
+            'imageTag': settings.imageTag || defaultSettings.imageTag,
+            'enableFloatingBall': settings.enableFloatingBall !== false
+        };
+
+        // 安全地更新每个元素
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                if (element.type === 'checkbox') {
+                    element.checked = value;
+                } else {
+                    element.value = value;
+                }
+            }
+        });
         
         return settings;
     } catch (error) {
@@ -89,8 +107,10 @@ async function saveSettings() {
             promptTemplate: document.getElementById('promptTemplate').value.trim() || defaultSettings.promptTemplate,
             includeSummaryUrl: document.getElementById('includeSummaryUrl').checked,
             includeSelectionUrl: document.getElementById('includeSelectionUrl').checked,
+            includeImageUrl: document.getElementById('includeImageUrl').checked,
             summaryTag: document.getElementById('summaryTag').value.trim(),
             selectionTag: document.getElementById('selectionTag').value.trim(),
+            imageTag: document.getElementById('imageTag').value.trim(),
             enableFloatingBall: document.getElementById('enableFloatingBall').checked
         };
 
@@ -365,23 +385,10 @@ async function fetchAiConfig() {
             return;
         }
 
-        // 提取基础URL
-        let baseUrl = '';
-        try {
-            const url = new URL(targetUrl);
-            const pathParts = url.pathname.split('/');
-            const v1Index = pathParts.indexOf('v1');
-            if (v1Index === -1) {
-                throw new Error('URL格式不正确，需要包含/v1路径');
-            }
-            baseUrl = url.origin + pathParts.slice(0, v1Index + 1).join('/');
-        } catch (error) {
-            showStatus('URL格式不正确: ' + error.message, 'error');
-            return;
-        }
-
-        // 请求配置
+        // 构建请求URL，确保不重复添加v1
+        const baseUrl = targetUrl.replace(/\/+$/, ''); // 移除末尾的斜杠
         const configUrl = `${baseUrl}/config/list`;
+
         showStatus('正在获取配置...', 'loading');
         
         const response = await fetch(configUrl, {

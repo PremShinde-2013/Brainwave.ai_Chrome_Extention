@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Blinko网页内容提取总结",
-  "version": "1.3",
+  "version": "1.4",
   "description": "划词保存、提取网页内容并生成总结",
   "permissions": [
     "activeTab",
     "storage",
     "contextMenus",
-    "scripting"
+    "scripting",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"

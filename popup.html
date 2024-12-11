@@ -348,28 +348,40 @@
             <div class="help-text">网页总结时是否包含原文链接</div>
         </div>
 
-        <div class="input-container">
-            <label for="includeSelectionUrl">划词保存包含URL:</label>
-            <input type="checkbox" id="includeSelectionUrl">
-            <div class="help-text">划词保存时是否包含原文链接</div>
+        <div class="setting-group">
+            <label>
+                <input type="checkbox" id="includeSelectionUrl">
+                划词保存时包含网页链接
+            </label>
         </div>
 
-        <div class="input-container">
-            <label for="summaryTag">网页总结标签:</label>
-            <input type="text" id="summaryTag" class="text-input" placeholder="#阅读/网页">
-            <div class="help-text">这个标签会添加到网页总结的末尾</div>
+        <div class="setting-group">
+            <label>
+                <input type="checkbox" id="includeImageUrl">
+                图片保存时包含网页链接
+            </label>
         </div>
 
-        <div class="input-container">
-            <label for="selectionTag">划词保存标签:</label>
-            <input type="text" id="selectionTag" class="text-input" placeholder="#摘录">
-            <div class="help-text">这个标签会添加到划词保存内容的末尾</div>
+        <div class="setting-group">
+            <label>总结标签：</label>
+            <input type="text" id="summaryTag" class="text-input">
         </div>
 
-        <div class="input-container">
-            <label for="enableFloatingBall">启用悬浮球:</label>
-            <input type="checkbox" id="enableFloatingBall" checked>
-            <div class="help-text">在网页上显示快捷总结悬浮球</div>
+        <div class="setting-group">
+            <label>划词标签：</label>
+            <input type="text" id="selectionTag" class="text-input">
+        </div>
+
+        <div class="setting-group">
+            <label>图片标签：</label>
+            <input type="text" id="imageTag" class="text-input">
+        </div>
+
+        <div class="setting-group">
+            <label>
+                <input type="checkbox" id="enableFloatingBall">
+                启用悬浮球
+            </label>
         </div>
 
         <div class="settings-actions">

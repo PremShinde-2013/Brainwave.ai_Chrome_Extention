@@ -181,7 +181,53 @@ chrome.runtime.onInstalled.addListener(() => {
         title: "发送到Blinko笔记",
         contexts: ["selection"]
     });
+
+    // 创建图片右键菜单
+    chrome.contextMenus.create({
+        id: 'saveImageToBlinko',
+        title: '保存图片到Blinko',
+        contexts: ['image']
+    });
 });
+
+// 发送内容到Blinko
+async function sendToBlinko(content, url, title) {
+    try {
+        // 获取设置
+        const result = await chrome.storage.sync.get('settings');
+        const settings = result.settings;
+        
+        if (!settings || !settings.targetUrl || !settings.authKey) {
+            throw new Error('请先配置Blinko API URL和认证密钥');
+        }
+
+        // 构建请求URL，确保不重复添加v1
+        const baseUrl = settings.targetUrl.replace(/\/+$/, ''); // 移除末尾的斜杠
+        const requestUrl = `${baseUrl}/note/upsert`;
+
+        // 发送请求
+        const response = await fetch(requestUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': settings.authKey
+            },
+            body: JSON.stringify({
+                content: content
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`保存失败: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return { success: true, data };
+    } catch (error) {
+        console.error('发送到Blinko失败:', error);
+        return { success: false, error: error.message };
+    }
+}
 
 // 处理右键菜单点击
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -216,6 +262,57 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
             }
         } catch (error) {
             console.error('发送选中文本失败:', error);
+        }
+    }
+
+    if (info.menuItemId === 'saveImageToBlinko') {
+        try {
+            // 获取设置
+            const result = await chrome.storage.sync.get('settings');
+            const settings = result.settings;
+            
+            if (!settings) {
+                throw new Error('未找到设置信息');
+            }
+
+            // 构建Markdown格式的图片链接
+            let content = `![${tab.title || '图片'}](${info.srcUrl})`;
+            
+            // 如果设置中选择包含URL，则添加原网页链接
+            if (settings.includeImageUrl) {
+                content += `\n\n> 来源：[${tab.title}](${tab.url})`;
+            }
+
+            // 添加图片标签，确保前面有换行符
+            if (settings.imageTag) {
+                content += `\n\n${settings.imageTag}`;
+            }
+
+            // 发送到Blinko
+            const response = await sendToBlinko(content);
+            
+            if (response.success) {
+                // 通知用户保存成功
+                chrome.action.setIcon({
+                    path: "images/icon128_success_reverse.png"
+                });
+                setTimeout(() => {
+                    chrome.action.setIcon({
+                        path: "images/icon128.png"
+                    });
+                }, 1000);
+            } else {
+                throw new Error(response.error || '保存失败');
+            }
+        } catch (error) {
+            console.error('保存图片失败:', error);
+            // 可以考虑添加一个通知来显示错误信息
+            chrome.notifications.create({
+                type: 'basic',
+                iconUrl: 'images/icon128.png',
+                title: '保存失败',
+                message: error.message
+            });
         }
     }
 });
