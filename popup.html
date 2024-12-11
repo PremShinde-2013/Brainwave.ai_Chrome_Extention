@@ -214,26 +214,79 @@
         }
 
         /* 设置页面样式 */
-        .input-container label {
+        .setting-group {
+            margin-bottom: 16px;
+            padding: 12px;
+            background-color: #fff;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+
+        .setting-group label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-size: 14px;
             color: #495057;
             font-weight: 500;
         }
 
-        .help-text {
-            font-size: 12px;
-            color: #868e96;
-            margin-top: 4px;
+        .setting-group input[type="text"],
+        .setting-group input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #495057;
+            background-color: #fff;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
         }
 
-        .input-container input[type="text"]:focus,
-        .input-container input[type="number"]:focus,
-        .input-container textarea:focus {
+        .setting-group input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .setting-group input[type="text"]:focus,
+        .setting-group input[type="number"]:focus {
             border-color: #C35AF7;
             outline: none;
             box-shadow: 0 0 0 3px rgba(195, 90, 247, 0.1);
+        }
+
+        .settings-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .settings-actions button {
+            flex: 1;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .settings-actions button:first-child {
+            background-color: #FFCC00;
+            color: #000000;
+        }
+
+        .settings-actions button:first-child:hover {
+            background-color: #E6B800;
+        }
+
+        .settings-actions button.secondary {
+            background-color: #f1f3f5;
+            color: #495057;
+        }
+
+        .settings-actions button.secondary:hover {
+            background-color: #e9ecef;
         }
 
         /* 链接颜色 */
@@ -302,49 +355,51 @@
 
     <div id="settings" class="tabcontent">
         <h2>设置</h2>
-        <div class="input-container">
-            <label for="targetUrl">Blinko API URL:</label>
-            <input type="text" id="targetUrl" class="text-input" placeholder="https://your-domain/api/v1">
+        <div class="setting-group">
+            <label>Blinko API URL:</label>
+            <input type="text" id="targetUrl" placeholder="https://your-domain/api/v1">
             <div class="help-text">填写到/v1即可，无需填写完整路径</div>
         </div>
         
-        <div class="input-container">
-            <label for="authKey">Blinko认证密钥:</label>
-            <input type="text" id="authKey" class="text-input sensitive-input" placeholder="your-auth-key">
+        <div class="setting-group">
+            <label>Blinko认证密钥:</label>
+            <input type="text" id="authKey" class="sensitive-input" placeholder="your-auth-key">
             <button class="toggle-visibility" title="显示/隐藏">👁️</button>
             <button id="fetchAiConfig" class="fetch-button">从Blinko获取AI配置</button>
         </div>
 
-        <div class="input-container">
-            <label for="modelUrl">OpenAI兼容接口地址:</label>
-            <input type="text" id="modelUrl" class="text-input" placeholder="https://api.openai.com/v1">
+        <div class="setting-group">
+            <label>OpenAI兼容接口地址:</label>
+            <input type="text" id="modelUrl" placeholder="https://api.openai.com/v1">
             <div class="help-text">填写到/v1即可，无需填写完整路径</div>
         </div>
         
-        <div class="input-container">
-            <label for="apiKey">API密钥:</label>
-            <input type="text" id="apiKey" class="text-input sensitive-input" placeholder="sk-...">
+        <div class="setting-group">
+            <label>API密钥:</label>
+            <input type="text" id="apiKey" class="sensitive-input" placeholder="sk-...">
             <button class="toggle-visibility" title="显示/隐藏">👁️</button>
         </div>
 
-        <div class="input-container">
-            <label for="modelName">模型名称:</label>
-            <input type="text" id="modelName" class="text-input" placeholder="gpt-3.5-turbo">
+        <div class="setting-group">
+            <label>模型名称:</label>
+            <input type="text" id="modelName" placeholder="gpt-3.5-turbo">
         </div>
 
-        <div class="input-container">
-            <label for="temperature">温度:</label>
-            <input type="number" id="temperature" class="text-input" min="0" max="1" step="0.1" value="0.7">
+        <div class="setting-group">
+            <label>温度:</label>
+            <input type="number" id="temperature" min="0" max="1" step="0.1" value="0.7">
         </div>
 
-        <div class="input-container">
-            <label for="promptTemplate">提示词模板:</label>
+        <div class="setting-group">
+            <label>提示词模板:</label>
             <textarea id="promptTemplate" class="text-input" placeholder="请用简洁的语言总结以下内容，突出重点：{content}"></textarea>
         </div>
 
-        <div class="input-container">
-            <label for="includeSummaryUrl">总结笔记包含URL:</label>
-            <input type="checkbox" id="includeSummaryUrl" checked>
+        <div class="setting-group">
+            <label>
+                <input type="checkbox" id="includeSummaryUrl">
+                总结笔记包含URL
+            </label>
             <div class="help-text">网页总结时是否包含原文链接</div>
         </div>
 
@@ -364,17 +419,17 @@
 
         <div class="setting-group">
             <label>总结标签：</label>
-            <input type="text" id="summaryTag" class="text-input">
+            <input type="text" id="summaryTag" placeholder="#网页/总结">
         </div>
 
         <div class="setting-group">
             <label>划词标签：</label>
-            <input type="text" id="selectionTag" class="text-input">
+            <input type="text" id="selectionTag" placeholder="#网页/摘录">
         </div>
 
         <div class="setting-group">
             <label>图片标签：</label>
-            <input type="text" id="imageTag" class="text-input">
+            <input type="text" id="imageTag" placeholder="#网页/图片">
         </div>
 
         <div class="setting-group">
@@ -385,8 +440,8 @@
         </div>
 
         <div class="settings-actions">
-            <button id="saveSettings" class="button">保存设置</button>
-            <button id="resetSettings" class="button secondary">重置默认值</button>
+            <button id="saveSettings">保存设置</button>
+            <button id="resetSettings" class="secondary">重置默认值</button>
         </div>
     </div>
 

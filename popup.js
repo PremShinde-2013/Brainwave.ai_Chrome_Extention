@@ -265,7 +265,7 @@ async function showSummaryPreview() {
     }
 }
 
-// 处理总结��应
+// 处理总结应
 async function handleSummaryResponse(response) {
     if (response.success) {
         const settings = await loadSettings();
@@ -337,8 +337,10 @@ async function getCurrentTab() {
 
 // 保存快捷记录内容
 function saveQuickNote() {
-    const content = document.getElementById('quickNoteInput').value;
-    chrome.storage.local.set({ [QUICK_NOTE_KEY]: content });
+    const input = document.getElementById('quickNoteInput');
+    if (input && input.value.trim()) {
+        chrome.storage.local.set({ [QUICK_NOTE_KEY]: input.value });
+    }
 }
 
 // 加载快捷记录内容
@@ -355,8 +357,12 @@ async function loadQuickNote() {
 
 // 清除快捷记录内容
 function clearQuickNote() {
-    document.getElementById('quickNoteInput').value = '';
-    chrome.storage.local.remove(QUICK_NOTE_KEY);
+    const input = document.getElementById('quickNoteInput');
+    if (input) {
+        input.value = '';
+        // 清除storage中的数据
+        chrome.storage.local.remove(QUICK_NOTE_KEY);
+    }
 }
 
 // 发送快捷记录
@@ -375,17 +381,16 @@ async function sendQuickNote() {
             throw new Error('未找到设置信息');
         }
 
+        // 发送到background
         chrome.runtime.sendMessage({
             action: 'saveSummary',
-            content: content,
-            url: undefined,  // 不包含URL
-            title: undefined,
-            tag: undefined,  // 不包含标签
-            isSelection: false
+            type: 'quickNote',  // 标记这是快捷记录
+            content: content.trim()
         }, response => {
             if (response.success) {
                 showStatus('发送成功', 'success');
-                clearQuickNote();  // 发送成功后清除内容
+                // 发送成功后清除内容和存储
+                clearQuickNote();
             } else {
                 showStatus('发送失败: ' + response.error, 'error');
             }
@@ -407,7 +412,7 @@ async function fetchAiConfig() {
         }
 
         // 构建请求URL，确保不重复添加v1
-        const baseUrl = targetUrl.replace(/\/+$/, ''); // 移除���尾的斜杠
+        const baseUrl = targetUrl.replace(/\/+$/, ''); // 移除尾的斜杠
         const configUrl = `${baseUrl}/config/list`;
 
         showStatus('正在获取配置...', 'loading');

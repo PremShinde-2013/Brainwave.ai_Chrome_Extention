@@ -188,23 +188,31 @@ async function handleSaveSummary(request, sendResponse) {
             throw new Error('未找到设置信息');
         }
 
-        // 获取当前总结内容
-        const currentSummary = await chrome.storage.local.get('currentSummary');
-        if (!currentSummary.currentSummary || !currentSummary.currentSummary.summary) {
-            throw new Error('没有可保存的内容');
-        }
+        let finalContent;
+        
+        // 如果是快捷记录
+        if (request.type === 'quickNote') {
+            if (!request.content || !request.content.trim()) {
+                throw new Error('请输入笔记内容');
+            }
+            finalContent = request.content.trim();
+        } else {
+            // 如果是总结内容
+            const currentSummary = await chrome.storage.local.get('currentSummary');
+            if (!currentSummary.currentSummary || !currentSummary.currentSummary.summary) {
+                throw new Error('没有可保存的内容');
+            }
+            finalContent = currentSummary.currentSummary.summary;
 
-        // 准备最终内容
-        let finalContent = currentSummary.currentSummary.summary;
+            // 如果设置中选择包含URL，则添加原网页链接
+            if (settings.includeSummaryUrl && currentSummary.currentSummary.url) {
+                finalContent = `${finalContent}\n\n原文链接：[${currentSummary.currentSummary.title || currentSummary.currentSummary.url}](${currentSummary.currentSummary.url})`;
+            }
 
-        // 如果设置中选择包含URL，则添加原网页链接
-        if (settings.includeSummaryUrl && currentSummary.currentSummary.url) {
-            finalContent = `${finalContent}\n\n原文链接：[${currentSummary.currentSummary.title || currentSummary.currentSummary.url}](${currentSummary.currentSummary.url})`;
-        }
-
-        // 添加总结标签
-        if (settings.summaryTag) {
-            finalContent = `${finalContent}\n\n${settings.summaryTag}`;
+            // 添加总结标签
+            if (settings.summaryTag) {
+                finalContent = `${finalContent}\n\n${settings.summaryTag}`;
+            }
         }
 
         // 获取完整的API URL
@@ -225,20 +233,21 @@ async function handleSaveSummary(request, sendResponse) {
             throw new Error(`保存失败: ${response.status}`);
         }
 
-        // 保存成功后清除存储的内容
-        await chrome.storage.local.remove('currentSummary');
-        // 清除状态
-        summaryState = {
-            status: 'none',
-            summary: null,
-            url: null,
-            title: null
-        };
+        // 如果是总结内容，清除存储
+        if (!request.type || request.type !== 'quickNote') {
+            await chrome.storage.local.remove('currentSummary');
+            summaryState = {
+                status: 'none',
+                summary: null,
+                url: null,
+                title: null
+            };
+        }
 
         sendResponse({ success: true });
 
     } catch (error) {
-        console.error('保存总结时出错:', error);
+        console.error('保存内容时出错:', error);
         sendResponse({ 
             success: false, 
             error: error.message 
