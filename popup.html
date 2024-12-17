@@ -338,6 +338,11 @@
             <div class="function-title">网页总结</div>
             <button id="extract" class="extract-button">提取并总结页面内容</button>
         </div>
+
+        <div class="function-section">
+            <div class="function-title">提取网页正文</div>
+            <button id="extractContent" class="extract-button">提取网页正文</button>
+        </div>
         
         <div id="summaryPreview">
             <h3>总结预览</h3>
@@ -437,6 +442,31 @@
                 <input type="checkbox" id="enableFloatingBall">
                 启用悬浮球
             </label>
+        </div>
+
+        <div class="setting-group">
+            <label>Jina Reader API Key:</label>
+            <input type="text" id="jinaApiKey" class="sensitive-input" placeholder="your-jina-api-key">
+            <button class="toggle-visibility" title="显示/隐藏">👁️</button>
+        </div>
+
+        <div class="setting-group">
+            <label>
+                <input type="checkbox" id="useJinaApiKey">
+                使用API Key加速提取
+            </label>
+        </div>
+
+        <div class="setting-group">
+            <label>
+                <input type="checkbox" id="saveWebImages">
+                保存网页图片链接
+            </label>
+        </div>
+
+        <div class="setting-group">
+            <label>网页剪藏标签：</label>
+            <input type="text" id="extractTag" placeholder="#网页/剪藏">
         </div>
 
         <div class="settings-actions">

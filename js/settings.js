@@ -31,7 +31,11 @@ const defaultSettings = {
     summaryTag: '#网页/总结',   // 网页总结的标签
     selectionTag: '#网页/摘录',      // 划词保存的标签
     imageTag: '#网页/图片',         // 图片保存的标签
-    enableFloatingBall: true    // 是否启用悬浮球
+    enableFloatingBall: true,    // 是否启用悬浮球
+    jinaApiKey: '',             // Jina Reader API Key
+    useJinaApiKey: false,       // 是否使用API Key加速
+    saveWebImages: false,       // 是否保存网页图片链接
+    extractTag: '#网页/剪藏'     // 网页剪藏的标签
 };
 
 // 加载设置
@@ -52,6 +56,10 @@ async function loadSettings() {
             settings.includeSelectionUrl = settings.includeSelectionUrl !== undefined ? settings.includeSelectionUrl : defaultSettings.includeSelectionUrl;
             settings.includeImageUrl = settings.includeImageUrl !== undefined ? settings.includeImageUrl : defaultSettings.includeImageUrl;
             settings.enableFloatingBall = settings.enableFloatingBall !== undefined ? settings.enableFloatingBall : defaultSettings.enableFloatingBall;
+            settings.jinaApiKey = settings.jinaApiKey || defaultSettings.jinaApiKey;
+            settings.useJinaApiKey = settings.useJinaApiKey || defaultSettings.useJinaApiKey;
+            settings.saveWebImages = settings.saveWebImages || defaultSettings.saveWebImages;
+            settings.extractTag = settings.extractTag || defaultSettings.extractTag;
             // 标签设置保持原样，不使用默认值
         }
 
@@ -72,7 +80,11 @@ async function loadSettings() {
             'summaryTag': settings.summaryTag || '',
             'selectionTag': settings.selectionTag || '',
             'imageTag': settings.imageTag || '',
-            'enableFloatingBall': settings.enableFloatingBall !== false
+            'enableFloatingBall': settings.enableFloatingBall !== false,
+            'jinaApiKey': settings.jinaApiKey || '',
+            'useJinaApiKey': settings.useJinaApiKey !== false,
+            'saveWebImages': settings.saveWebImages !== false,
+            'extractTag': settings.extractTag || ''
         };
 
         // 安全地更新每个元素
@@ -112,7 +124,11 @@ async function saveSettings() {
             summaryTag: document.getElementById('summaryTag').value,  // 不使用trim()，允许空值
             selectionTag: document.getElementById('selectionTag').value,  // 不使用trim()，允许空值
             imageTag: document.getElementById('imageTag').value,  // 不使用trim()，允许空值
-            enableFloatingBall: document.getElementById('enableFloatingBall').checked
+            enableFloatingBall: document.getElementById('enableFloatingBall').checked,
+            jinaApiKey: document.getElementById('jinaApiKey').value || defaultSettings.jinaApiKey,
+            useJinaApiKey: document.getElementById('useJinaApiKey').checked || defaultSettings.useJinaApiKey,
+            saveWebImages: document.getElementById('saveWebImages').checked || defaultSettings.saveWebImages,
+            extractTag: document.getElementById('extractTag').value || defaultSettings.extractTag
         };
 
         // 保存到chrome.storage
@@ -131,7 +147,7 @@ async function saveSettings() {
             }
         }
 
-        console.log('设置已保���:', settings);
+        console.log('设置已保存:', settings);
         showStatus('设置已保存', 'success');
         return settings;
     } catch (error) {
@@ -160,6 +176,10 @@ async function resetSettings() {
         document.getElementById('summaryTag').value = settings.summaryTag;
         document.getElementById('selectionTag').value = settings.selectionTag;
         document.getElementById('enableFloatingBall').checked = settings.enableFloatingBall;
+        document.getElementById('jinaApiKey').value = settings.jinaApiKey;
+        document.getElementById('useJinaApiKey').checked = settings.useJinaApiKey;
+        document.getElementById('saveWebImages').checked = settings.saveWebImages;
+        document.getElementById('extractTag').value = settings.extractTag;
         
         console.log('设置已重置为默认值:', settings);
         showStatus('设置已重置为默认值', 'success');

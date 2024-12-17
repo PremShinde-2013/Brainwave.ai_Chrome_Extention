@@ -202,7 +202,7 @@ function handleDragEnd(ball) {
     savePosition(position);
 }
 
-async function handleClick(ball) {
+async function handleClick(ball, isRightClick = false) {
     const state = getState();
     if (state.isDragging || state.isProcessing) return;
     
@@ -219,7 +219,8 @@ async function handleClick(ball) {
             action: 'processAndSendContent',
             content: content,
             title: metadata.title,
-            url: metadata.url
+            url: metadata.url,
+            isExtractOnly: isRightClick  // 添加标记表明是否仅提取内容
         });
 
         if (response && response.processing) {
@@ -236,7 +237,7 @@ async function handleClick(ball) {
         chrome.runtime.sendMessage({
             action: 'showNotification',
             type: 'error',
-            title: '总结失败',
+            title: '操作失败',
             message: error.message
         });
     }
@@ -244,12 +245,20 @@ async function handleClick(ball) {
 
 function initializeEventListeners(ball) {
     // 处理拖拽
-    ball.addEventListener('mousedown', e => handleDragStart(e, ball));
+    ball.addEventListener('mousedown', e => {
+        if (e.button === 0) { // 左键
+            handleDragStart(e, ball);
+        }
+    });
     document.addEventListener('mousemove', e => handleDragMove(e, ball));
     document.addEventListener('mouseup', () => handleDragEnd(ball));
 
     // 处理点击
-    ball.addEventListener('click', () => handleClick(ball));
+    ball.addEventListener('click', () => handleClick(ball, false));  // 左键点击
+    ball.addEventListener('contextmenu', (e) => {
+        e.preventDefault();  // 阻止默认右键菜单
+        handleClick(ball, true);  // 右键点击
+    });
 }
 
 // 主要逻辑

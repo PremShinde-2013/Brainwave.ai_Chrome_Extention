@@ -39,6 +39,39 @@ document.addEventListener('DOMContentLoaded', async function() {
         initializeQuickNoteListeners();
         initializeSummaryListeners();
 
+        // 绑定提取网页正文按钮事件
+        document.getElementById('extractContent').addEventListener('click', async () => {
+            try {
+                showStatus('正在提取网页内容...', 'loading');
+                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                if (!tab) {
+                    throw new Error('无法获取当前标签页');
+                }
+
+                // 发送消息到content script获取内容
+                const response = await chrome.tabs.sendMessage(tab.id, {
+                    action: 'getContent'
+                });
+
+                if (!response || !response.success) {
+                    throw new Error(response.error || '获取内容失败');
+                }
+
+                // 发送到background处理
+                await chrome.runtime.sendMessage({
+                    action: 'getContent',
+                    content: response.content,
+                    url: response.url,
+                    title: response.title,
+                    isExtractOnly: true
+                });
+
+            } catch (error) {
+                console.error('提取网页内容失败:', error);
+                showStatus('提取失败: ' + error.message, 'error');
+            }
+        });
+
         // 绑定设置相关事件
         document.getElementById('saveSettings').addEventListener('click', async () => {
             try {
@@ -60,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
 
-        // 绑��获取AI配置按钮事件
+        // 绑定获取AI配置按钮事件
         document.getElementById('fetchAiConfig').addEventListener('click', fetchAiConfig);
 
     } catch (error) {
@@ -84,10 +117,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ received: true });
     } else if (request && request.action === 'floatingBallResponse') {
         if (request.response.success) {
-            showStatus('处理成功', 'success');
+            showStatus(request.response.isExtractOnly ? '提取成功' : '总结成功', 'success');
             setTimeout(hideStatus, 2000);
         } else {
-            showStatus('处理失败: ' + request.response.error, 'error');
+            showStatus((request.response.isExtractOnly ? '提取' : '总结') + '失败: ' + request.response.error, 'error');
         }
         sendResponse({ received: true });
     } else if (request && request.action === 'clearSummaryResponse') {

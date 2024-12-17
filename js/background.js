@@ -61,7 +61,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     chrome.tabs.sendMessage(sender.tab.id, {
                         action: 'updateFloatingBallState',
                         success: false,
-                        error: error.message || '处理请��失败'
+                        error: error.message || '处理请求失败'
                     }).catch(() => {
                         console.log('无法更新悬浮球状态');
                     });

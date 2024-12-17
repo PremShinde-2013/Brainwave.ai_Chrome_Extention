@@ -1,4 +1,5 @@
 import { getSummaryFromModel, sendToTarget } from './api.js';
+import { getWebContent } from './jinaReader.js';
 import { getSummaryState, updateSummaryState, clearSummaryState, saveSummaryToStorage } from './summaryState.js';
 
 // 处理内容请求
@@ -23,13 +24,22 @@ async function handleContentRequest(request) {
             throw new Error('未找到设置信息');
         }
 
-        // 检查必要的设置是否存在
-        if (!settings.modelUrl || !settings.apiKey || !settings.modelName) {
-            throw new Error('请先完成API设置');
+        let summary;
+        if (request.isExtractOnly) {
+            // 使用Jina Reader API提取内容
+            const response = await getWebContent(request.url, settings);
+            if (!response.success) {
+                throw new Error(response.error);
+            }
+            summary = response.content;
+        } else {
+            // 检查必要的设置是否存在
+            if (!settings.modelUrl || !settings.apiKey || !settings.modelName) {
+                throw new Error('请先完成API设置');
+            }
+            // 生成总结
+            summary = await getSummaryFromModel(request.content, settings);
         }
-
-        // 生成总结
-        const summary = await getSummaryFromModel(request.content, settings);
         
         // 更新状态为完成
         updateSummaryState({
@@ -48,7 +58,8 @@ async function handleContentRequest(request) {
                 summary: summary,
                 url: request.url,
                 title: request.title,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                isExtractOnly: request.isExtractOnly
             }
         });
 
@@ -59,15 +70,16 @@ async function handleContentRequest(request) {
                 success: true,
                 summary: summary,
                 url: request.url,
-                title: request.title
+                title: request.title,
+                isExtractOnly: request.isExtractOnly
             }).catch(() => {
                 // 忽略错误，popup可能已关闭
                 // 如果popup已关闭，显示系统通知
                 chrome.notifications.create({
                     type: 'basic',
                     iconUrl: chrome.runtime.getURL('images/icon128.png'),
-                    title: '总结完成',
-                    message: `已完成对"${request.title || '页面'}"的内容总结，点击扩展图标查看。`,
+                    title: request.isExtractOnly ? '提取完成' : '总结完成',
+                    message: `已完成对"${request.title || '页面'}"的${request.isExtractOnly ? '内容提取' : '内容总结'}，点击扩展图标查看。`,
                     priority: 2
                 });
             });
@@ -77,8 +89,8 @@ async function handleContentRequest(request) {
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: chrome.runtime.getURL('images/icon128.png'),
-                title: '总结完成',
-                message: `已完成对"${request.title || '页面'}"的内容总结，点击扩展图标查看。`,
+                title: request.isExtractOnly ? '提取完成' : '总结完成',
+                message: `已完成对"${request.title || '页面'}"的${request.isExtractOnly ? '内容提取' : '内容总结'}，点击扩展图标查看。`,
                 priority: 2
             });
         }
@@ -98,7 +110,8 @@ async function handleContentRequest(request) {
             await chrome.runtime.sendMessage({
                 action: 'handleSummaryResponse',
                 success: false,
-                error: error.message
+                error: error.message,
+                isExtractOnly: request.isExtractOnly
             }).catch(() => {
                 // 忽略错误，popup可能已关闭
             });
@@ -110,8 +123,8 @@ async function handleContentRequest(request) {
         chrome.notifications.create({
             type: 'basic',
             iconUrl: 'images/icon128.png',
-            title: '总结失败',
-            message: `总结"${request.title || '页面'}"时出错: ${error.message}`
+            title: request.isExtractOnly ? '提取失败' : '总结失败',
+            message: `${request.isExtractOnly ? '提取' : '总结'}"${request.title || '页面'}"时出错: ${error.message}`
         });
     }
 }
@@ -210,44 +223,25 @@ async function handleFloatingBallRequest(request) {
             throw new Error('未找到设置信息');
         }
 
-        // 检查必要的设置是否存在
-        if (!settings.modelUrl || !settings.apiKey || !settings.modelName) {
-            throw new Error('请先完成API设置');
+        let summary;
+        if (request.isExtractOnly) {
+            // 使用Jina Reader API提取内容
+            const response = await getWebContent(request.url, settings);
+            if (!response.success) {
+                throw new Error(response.error);
+            }
+            summary = response.content;
+        } else {
+            // 检查必要的设置是否存在
+            if (!settings.modelUrl || !settings.apiKey || !settings.modelName) {
+                throw new Error('请先完成API设置');
+            }
+            // 生成总结
+            summary = await getSummaryFromModel(request.content, settings);
         }
 
-        let summary;
-        let retryCount = 0;
-        const maxRetries = 3;
-        
-        // 添加重试逻辑
-        while (retryCount < maxRetries) {
-            try {
-                // 设置超时
-                const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error('请求超时')), 30000); // 30秒超时
-                });
-                
-                // 生成总结
-                const summaryPromise = getSummaryFromModel(request.content, settings);
-                summary = await Promise.race([summaryPromise, timeoutPromise]);
-                break; // 如果成功，跳出重试循环
-            } catch (error) {
-                retryCount++;
-                if (retryCount === maxRetries) {
-                    throw error; // 如果达到最大重试次数，抛出错误
-                }
-                // 等待一段时间后重试
-                await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
-            }
-        }
-        
         // 准备最终内容
         let finalContent = summary;
-
-        // 如果有总结标签，添加到内容末尾
-        if (settings.summaryTag) {
-            finalContent = `${finalContent}\n\n${settings.summaryTag}`;
-        }
 
         // 发送到服务器（使用现有的重试机制）
         const response = await sendToTarget(finalContent, settings, request.url, 0, request.title, false);
@@ -268,7 +262,10 @@ async function handleFloatingBallRequest(request) {
             try {
                 await chrome.runtime.sendMessage({
                     action: 'floatingBallResponse',
-                    response: { success: true }
+                    response: { 
+                        success: true,
+                        isExtractOnly: request.isExtractOnly
+                    }
                 });
             } catch (error) {
                 console.log('发送响应失败，content script可能已关闭');
@@ -295,7 +292,8 @@ async function handleFloatingBallRequest(request) {
                 action: 'floatingBallResponse',
                 response: { 
                     success: false, 
-                    error: error.message 
+                    error: error.message,
+                    isExtractOnly: request.isExtractOnly
                 }
             });
         } catch (error) {
