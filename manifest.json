@@ -19,9 +19,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": {
-      "128": "images/icon128.png"
-    }
+    "default_icon": "images/icon128.png"
   },
   "background": {
     "service_worker": "js/background.js",
@@ -31,8 +29,9 @@
     {
       "matches": ["<all_urls>"],
       "js": [
-        "js/content/content.js",
-        "js/floatingBall/floatingBall.js"
+        "js/content/contentExtractor.js",
+        "js/floatingBall/floatingBall.js",
+        "js/content/content.js"
       ],
       "run_at": "document_end"
     }

@@ -23,8 +23,7 @@ async function handleSummaryResponse(response) {
             await saveTempSummaryData({
                 summary: finalSummary,
                 url: response.url,
-                title: response.title,
-                tag: settings.settings?.summaryTag  // 使用可选链操作符
+                title: response.title
             });
 
             // 显示预览
@@ -50,39 +49,24 @@ async function saveSummary() {
         const tempData = await loadTempSummaryData();
         const settings = await chrome.storage.sync.get('settings');
         
-        if (!summary || !tempData) {
+        if (!summary || !summary.trim()) {
             showStatus('没有可保存的内容', 'error');
             return;
         }
 
         showStatus('正在保存...', 'loading');
         
-        // 在这里添加标签到内容中
-        let finalContent = summary;
-        if (settings.settings?.summaryTag) {
-            finalContent = finalContent.trim() + '\n' + settings.settings.summaryTag;
-        }
-        
-        // 使用 Promise 包装消息发送
-        const response = await new Promise((resolve) => {
-            chrome.runtime.sendMessage({
-                action: 'saveSummary',
-                content: finalContent,
-                url: settings.settings?.includeSummaryUrl ? tempData.url : undefined,
-                title: tempData.title
-            }, (response) => {
-                resolve(response || { success: false, error: '保存失败' });
-            });
+        // 发送消息到background
+        chrome.runtime.sendMessage({
+            action: 'saveSummary',
+            content: summary.trim(),
+            url: settings.settings?.includeSummaryUrl ? (tempData?.url || '') : undefined,
+            title: tempData?.title || ''
         });
 
-        if (response.success) {
-            showStatus('保存成功', 'success');
-            // 清除文本框内容和临时数据
-            document.getElementById('summaryText').value = '';
-            await clearTempSummaryData();
-        } else {
-            showStatus('保存失败: ' + (response.error || '未知错误'), 'error');
-        }
+        // 清除文本框内容和临时数据
+        document.getElementById('summaryText').value = '';
+        await clearTempSummaryData();
     } catch (error) {
         console.error('保存总结时出错:', error);
         showStatus('保存失败: ' + error.message, 'error');
@@ -122,39 +106,40 @@ async function checkSummaryState() {
         }
 
         // 否则根据状态显示
-        if (response) {
-            switch (response.status) {
-                case 'completed':
-                    // 显示已完成的总结
-                    summaryPreview.style.display = 'block';
-                    summaryText.value = response.summary;
-                    pageTitle.textContent = response.title || '';
-                    pageUrl.textContent = response.url || '';
-                    extractBtn.textContent = '重新生成';
-                    extractBtn.disabled = false;
-                    break;
-                case 'processing':
-                    // 显示处理中状态
-                    summaryPreview.style.display = 'block';
-                    summaryText.value = '正在生成总结，请稍候...';
-                    pageTitle.textContent = response.title || '';
-                    pageUrl.textContent = response.url || '';
-                    extractBtn.textContent = '处理中...';
-                    extractBtn.disabled = true;
-                    break;
-                case 'error':
-                    // 显示错误状态
-                    showStatus(response.error, 'error');
-                    extractBtn.textContent = '重新生成';
-                    extractBtn.disabled = false;
-                    break;
-                case 'none':
-                    // 重置为初始状态
-                    extractBtn.textContent = '提取并总结页面内容';
-                    extractBtn.disabled = false;
-                    clearSummaryPreview();
-                    break;
-            }
+        if (response && response.status === 'completed' && response.summary) {
+            // 如果后台有完成的总结，保存并显示
+            await chrome.storage.local.set({
+                currentSummary: {
+                    summary: response.summary,
+                    url: response.url,
+                    title: response.title,
+                    timestamp: Date.now()
+                }
+            });
+            summaryPreview.style.display = 'block';
+            summaryText.value = response.summary;
+            pageTitle.textContent = response.title || '';
+            pageUrl.textContent = response.url || '';
+            extractBtn.textContent = '重新生成';
+            extractBtn.disabled = false;
+        } else if (response && response.status === 'processing') {
+            // 显示处理中状态
+            summaryPreview.style.display = 'block';
+            summaryText.value = '正在生成总结，请稍候...';
+            pageTitle.textContent = response.title || '';
+            pageUrl.textContent = response.url || '';
+            extractBtn.textContent = '处理中...';
+            extractBtn.disabled = true;
+        } else if (response && response.status === 'error') {
+            // 显示错误状态
+            showStatus(response.error, 'error');
+            extractBtn.textContent = '重新生成';
+            extractBtn.disabled = false;
+        } else {
+            // 重置为初始状态
+            extractBtn.textContent = '提取并总结页面内容';
+            extractBtn.disabled = false;
+            clearSummaryPreview();
         }
     } catch (error) {
         console.error('检查总结状态时出错:', error);
@@ -171,7 +156,7 @@ function initializeSummaryListeners() {
                 throw new Error('无法获取当前标签页');
             }
 
-            // 使用 Promise 包装消息发送
+            // 用 Promise 包装消息发送
             const response = await new Promise((resolve) => {
                 chrome.tabs.sendMessage(tab.id, { action: 'getContent' }, (response) => {
                     resolve(response || { success: false, error: '获取内容失败' });

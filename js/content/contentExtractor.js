@@ -36,9 +36,8 @@ function getImageInfo(img) {
     };
 }
 
-export {
-    extractPageContent,
-    getPageMetadata,
-    getSelectedText,
-    getImageInfo
-}; 
+// 将函数暴露到全局作用域
+window.extractPageContent = extractPageContent;
+window.getPageMetadata = getPageMetadata;
+window.getSelectedText = getSelectedText;
+window.getImageInfo = getImageInfo; 

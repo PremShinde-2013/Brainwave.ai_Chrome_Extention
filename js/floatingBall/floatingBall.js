@@ -211,11 +211,8 @@ async function handleClick(ball) {
 
     try {
         // 获取页面内容
-        const content = document.body.innerText;
-        const metadata = {
-            title: document.title,
-            url: window.location.href
-        };
+        const content = extractPageContent();
+        const metadata = getPageMetadata();
 
         // 发送消息给background script处理
         const response = await chrome.runtime.sendMessage({
@@ -225,22 +222,23 @@ async function handleClick(ball) {
             url: metadata.url
         });
 
-        if (response.success) {
-            // 显示成功动画
-            showSuccessState(ball);
-
-            // 3秒后恢复原状
-            setTimeout(() => {
-                resetState(ball);
-                updateState({ isProcessing: false });
-            }, 3000);
+        if (response && response.processing) {
+            // 等待实际的响应
+            return;  // background会处理剩余的流程
         } else {
-            throw new Error('Failed to process content');
+            throw new Error('请求处理失败');
         }
     } catch (error) {
-        console.error('Error processing content:', error);
+        console.error('处理内容时出错:', error);
         resetState(ball);
         updateState({ isProcessing: false });
+        // 显示错误通知
+        chrome.runtime.sendMessage({
+            action: 'showNotification',
+            type: 'error',
+            title: '总结失败',
+            message: error.message
+        });
     }
 }
 
@@ -288,13 +286,28 @@ async function createFloatingBall() {
 function initializeMessageListener() {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'updateFloatingBallState') {
-            if (request.enabled) {
-                const ball = document.getElementById('blinko-floating-ball');
-                if (!ball) {
-                    createFloatingBall();
-                }
-            } else {
+            const ball = document.getElementById('blinko-floating-ball');
+            if (!ball) return;
+
+            if (request.enabled === false) {
                 removeFloatingBall();
+            } else if (request.success !== undefined) {
+                // 处理总结结果
+                if (request.success) {
+                    showSuccessState(ball);
+                    // 3秒后恢复原状
+                    setTimeout(() => {
+                        resetState(ball);
+                        updateState({ isProcessing: false });
+                    }, 3000);
+                } else {
+                    resetState(ball);
+                    updateState({ isProcessing: false });
+                    // 可以考虑显示错误提示
+                    console.error('总结失败:', request.error);
+                }
+            } else if (!document.getElementById('blinko-floating-ball')) {
+                createFloatingBall();
             }
         }
     });
@@ -306,5 +319,5 @@ async function initialize() {
     await createFloatingBall();
 }
 
-// 启动初始化
-initialize();
+// 导出需要的函数
+window.initialize = initialize;

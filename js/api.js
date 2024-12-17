@@ -129,6 +129,25 @@ async function sendToTarget(content, settings, url, retryCount = 0, title = '', 
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        // 显示成功图标
+        try {
+            await chrome.action.setIcon({
+                path: chrome.runtime.getURL("images/icon128_success.png")
+            });
+            // 3秒后恢复原始图标
+            setTimeout(async () => {
+                try {
+                    await chrome.action.setIcon({
+                        path: chrome.runtime.getURL("images/icon128.png")
+                    });
+                } catch (error) {
+                    console.error('恢复图标失败:', error);
+                }
+            }, 3000);
+        } catch (error) {
+            console.error('设置成功图标失败:', error);
+        }
+
         return response;
     } catch (error) {
         if (retryCount < 3) {

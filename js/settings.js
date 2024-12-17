@@ -44,31 +44,34 @@ async function loadSettings() {
         if (!settings) {
             settings = { ...defaultSettings };
         } else {
-            // 确保所有默认设置项都存在
-            for (const key in defaultSettings) {
-                if (settings[key] === undefined) {
-                    settings[key] = defaultSettings[key];
-                }
-            }
+            // 只为必需的设置项提供默认值
+            settings.modelName = settings.modelName || defaultSettings.modelName;
+            settings.temperature = settings.temperature || defaultSettings.temperature;
+            settings.promptTemplate = settings.promptTemplate || defaultSettings.promptTemplate;
+            settings.includeSummaryUrl = settings.includeSummaryUrl !== undefined ? settings.includeSummaryUrl : defaultSettings.includeSummaryUrl;
+            settings.includeSelectionUrl = settings.includeSelectionUrl !== undefined ? settings.includeSelectionUrl : defaultSettings.includeSelectionUrl;
+            settings.includeImageUrl = settings.includeImageUrl !== undefined ? settings.includeImageUrl : defaultSettings.includeImageUrl;
+            settings.enableFloatingBall = settings.enableFloatingBall !== undefined ? settings.enableFloatingBall : defaultSettings.enableFloatingBall;
+            // 标签设置保持原样，不使用默认值
         }
 
         console.log('加载的设置:', settings);
         
-        // 更新UI，确保元素存在
+        // 更新UI
         const elements = {
             'targetUrl': settings.targetUrl || '',
             'authKey': settings.authKey || '',
             'modelUrl': settings.modelUrl || '',
             'apiKey': settings.apiKey || '',
-            'modelName': settings.modelName || 'gpt-3.5-turbo',
+            'modelName': settings.modelName || '',
             'temperature': settings.temperature || '0.7',
-            'promptTemplate': settings.promptTemplate || defaultSettings.promptTemplate,
+            'promptTemplate': settings.promptTemplate || '',
             'includeSummaryUrl': settings.includeSummaryUrl !== false,
             'includeSelectionUrl': settings.includeSelectionUrl !== false,
             'includeImageUrl': settings.includeImageUrl !== false,
-            'summaryTag': settings.summaryTag || defaultSettings.summaryTag,
-            'selectionTag': settings.selectionTag || defaultSettings.selectionTag,
-            'imageTag': settings.imageTag || defaultSettings.imageTag,
+            'summaryTag': settings.summaryTag || '',
+            'selectionTag': settings.selectionTag || '',
+            'imageTag': settings.imageTag || '',
             'enableFloatingBall': settings.enableFloatingBall !== false
         };
 
@@ -100,15 +103,15 @@ async function saveSettings() {
             authKey: document.getElementById('authKey').value.trim(),
             modelUrl: document.getElementById('modelUrl').value.trim(),
             apiKey: document.getElementById('apiKey').value.trim(),
-            modelName: document.getElementById('modelName').value.trim(),
-            temperature: parseFloat(document.getElementById('temperature').value) || 0.7,
-            promptTemplate: document.getElementById('promptTemplate').value.trim() || defaultSettings.promptTemplate,
+            modelName: document.getElementById('modelName').value.trim() || defaultSettings.modelName,
+            temperature: parseFloat(document.getElementById('temperature').value) || defaultSettings.temperature,
+            promptTemplate: document.getElementById('promptTemplate').value || defaultSettings.promptTemplate,
             includeSummaryUrl: document.getElementById('includeSummaryUrl').checked,
             includeSelectionUrl: document.getElementById('includeSelectionUrl').checked,
             includeImageUrl: document.getElementById('includeImageUrl').checked,
-            summaryTag: document.getElementById('summaryTag').value.trim(),
-            selectionTag: document.getElementById('selectionTag').value.trim(),
-            imageTag: document.getElementById('imageTag').value.trim(),
+            summaryTag: document.getElementById('summaryTag').value,  // 不使用trim()，允许空值
+            selectionTag: document.getElementById('selectionTag').value,  // 不使用trim()，允许空值
+            imageTag: document.getElementById('imageTag').value,  // 不使用trim()，允许空值
             enableFloatingBall: document.getElementById('enableFloatingBall').checked
         };
 
@@ -128,7 +131,7 @@ async function saveSettings() {
             }
         }
 
-        console.log('设置已保存:', settings);
+        console.log('设置已保���:', settings);
         showStatus('设置已保存', 'success');
         return settings;
     } catch (error) {

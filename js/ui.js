@@ -18,18 +18,14 @@ function openTab(evt, tabName) {
 async function showSuccessIcon() {
     try {
         await chrome.action.setIcon({
-            path: {
-                "128": "images/icon128_success.png"
-            }
+            path: chrome.runtime.getURL("images/icon128_success.png")
         });
 
         // 3秒后恢复原始图标
         setTimeout(async () => {
             try {
                 await chrome.action.setIcon({
-                    path: {
-                        "128": "images/icon128.png"
-                    }
+                    path: chrome.runtime.getURL("images/icon128.png")
                 });
             } catch (error) {
                 console.error('恢复图标失败:', error);
@@ -79,7 +75,7 @@ function clearSummaryPreview() {
     }
 }
 
-// 显示总结预览
+// 显示总结���览
 async function showSummaryPreview(tempData) {
     if (tempData && tempData.summary) {
         document.getElementById('summaryPreview').style.display = 'block';

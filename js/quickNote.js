@@ -34,9 +34,10 @@ function clearQuickNote() {
 // 发送快捷记录
 async function sendQuickNote() {
     try {
-        const content = document.getElementById('quickNoteInput').value;
+        const input = document.getElementById('quickNoteInput');
+        const content = input.value;
         if (!content.trim()) {
-            showStatus('���输入笔记内容', 'error');
+            showStatus('请输入笔记内容', 'error');
             return;
         }
 
@@ -47,20 +48,37 @@ async function sendQuickNote() {
             throw new Error('未找到设置信息');
         }
 
-        // 发送到background
-        chrome.runtime.sendMessage({
-            action: 'saveSummary',
-            type: 'quickNote',  // 标记这是快捷记录
-            content: content.trim()
-        }, response => {
-            if (response.success) {
-                showStatus('发送成功', 'success');
-                // 发送成功后清除内容和存储
-                clearQuickNote();
-            } else {
-                showStatus('发送失败: ' + response.error, 'error');
-            }
+        showStatus('正在发送...', 'loading');
+
+        // 发送消息并等待saveSummaryResponse
+        const responsePromise = new Promise((resolve) => {
+            const listener = (message) => {
+                if (message.action === 'saveSummaryResponse') {
+                    chrome.runtime.onMessage.removeListener(listener);
+                    resolve(message.response);
+                }
+            };
+            chrome.runtime.onMessage.addListener(listener);
+            
+            // 发送请求
+            chrome.runtime.sendMessage({
+                action: 'saveSummary',
+                type: 'quickNote',
+                content: content.trim()
+            });
         });
+
+        // 等待响应
+        const response = await responsePromise;
+
+        if (response && response.success) {
+            showStatus('发送成功', 'success');
+            // 发送成功后清除内容和存储
+            input.value = '';
+            await chrome.storage.local.remove(QUICK_NOTE_KEY);
+        } else {
+            showStatus('发送失败: ' + (response?.error || '未知错误'), 'error');
+        }
     } catch (error) {
         showStatus('发送失败: ' + error.message, 'error');
     }

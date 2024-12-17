@@ -6,6 +6,22 @@ import { checkSummaryState, initializeSummaryListeners, handleSummaryResponse } 
 // 初始化事件监听器
 document.addEventListener('DOMContentLoaded', async function() {
     try {
+        // 检查是否是通过通知点击打开的
+        const result = await chrome.storage.local.get(['notificationClicked', 'notificationTabId']);
+        if (result.notificationClicked) {
+            // 检查当前标签页是否匹配
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tab && tab.id === result.notificationTabId) {
+                // 清除标记
+                await chrome.storage.local.remove(['notificationClicked', 'notificationTabId']);
+                // 切换到主页面
+                const mainTab = document.querySelector('.tablinks[data-tab="main"]');
+                if (mainTab) {
+                    mainTab.click();
+                }
+            }
+        }
+
         // 加载设置
         await loadSettings();
         
@@ -44,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
 
-        // 绑定获取AI配置按钮事件
+        // 绑��获取AI配置按钮事件
         document.getElementById('fetchAiConfig').addEventListener('click', fetchAiConfig);
 
     } catch (error) {
@@ -58,8 +74,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request && request.action === 'handleSummaryResponse') {
         handleSummaryResponse(request);
         sendResponse({ received: true });
-        return true;
+    } else if (request && request.action === 'saveSummaryResponse') {
+        if (request.response.success) {
+            showStatus('保存成功', 'success');
+            setTimeout(hideStatus, 2000);
+        } else {
+            showStatus('保存失败: ' + request.response.error, 'error');
+        }
+        sendResponse({ received: true });
+    } else if (request && request.action === 'floatingBallResponse') {
+        if (request.response.success) {
+            showStatus('处理成功', 'success');
+            setTimeout(hideStatus, 2000);
+        } else {
+            showStatus('处理失败: ' + request.response.error, 'error');
+        }
+        sendResponse({ received: true });
+    } else if (request && request.action === 'clearSummaryResponse') {
+        if (request.success) {
+            showStatus('清除成功', 'success');
+            setTimeout(hideStatus, 2000);
+        }
+        sendResponse({ received: true });
     }
+    return false;  // 不保持消息通道开放
 });
 
 // 在popup关闭时通知background

@@ -37,7 +37,7 @@ function handleDragMove(e, ball) {
     ball.style.bottom = newBottom + 'px';
 }
 
-// 处理拖��结束
+// 处理拖拽结束
 function handleDragEnd(ball) {
     const state = getState();
     if (!state.isDragging) return;
@@ -74,17 +74,11 @@ async function handleClick(ball) {
             url: metadata.url
         });
 
-        if (response.success) {
-            // 显示成功动画
-            showSuccessState(ball);
-
-            // 3秒后恢复原状
-            setTimeout(() => {
-                resetState(ball);
-                updateState({ isProcessing: false });
-            }, 3000);
+        if (response && response.processing) {
+            // 等待实际的响应
+            return;  // background会处理剩余的流程
         } else {
-            throw new Error('Failed to process content');
+            throw new Error('请求处理失败');
         }
     } catch (error) {
         console.error('Error processing content:', error);
