@@ -86,9 +86,19 @@ function createFloatingBallStyle() {
             animation: spin 1s linear infinite;
         }
 
+        .loading-circle.reverse {
+            border-top-color: #C35AF7;
+            animation: spin-reverse 1s linear infinite;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @keyframes spin-reverse {
+            0% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
         }
 
         .processing .loading-circle {
@@ -125,8 +135,16 @@ function setFloatingBallPosition(ball, position) {
     Object.assign(ball.style, position);
 }
 
-function showLoadingState(ball) {
+function showLoadingState(ball, isRightClick = false) {
     ball.classList.add('processing');
+    const loadingCircle = ball.querySelector('.loading-circle');
+    if (loadingCircle) {
+        if (isRightClick) {
+            loadingCircle.classList.add('reverse');
+        } else {
+            loadingCircle.classList.remove('reverse');
+        }
+    }
 }
 
 function hideLoadingState(ball) {
@@ -207,7 +225,7 @@ async function handleClick(ball, isRightClick = false) {
     if (state.isDragging || state.isProcessing) return;
     
     updateState({ isProcessing: true });
-    showLoadingState(ball);
+    showLoadingState(ball, isRightClick);
 
     try {
         // 获取页面内容

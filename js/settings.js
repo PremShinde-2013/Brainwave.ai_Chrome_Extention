@@ -57,9 +57,9 @@ async function loadSettings() {
             settings.includeImageUrl = settings.includeImageUrl !== undefined ? settings.includeImageUrl : defaultSettings.includeImageUrl;
             settings.enableFloatingBall = settings.enableFloatingBall !== undefined ? settings.enableFloatingBall : defaultSettings.enableFloatingBall;
             settings.jinaApiKey = settings.jinaApiKey || defaultSettings.jinaApiKey;
-            settings.useJinaApiKey = settings.useJinaApiKey || defaultSettings.useJinaApiKey;
-            settings.saveWebImages = settings.saveWebImages || defaultSettings.saveWebImages;
-            settings.extractTag = settings.extractTag || defaultSettings.extractTag;
+            settings.useJinaApiKey = settings.useJinaApiKey !== undefined ? settings.useJinaApiKey : defaultSettings.useJinaApiKey;
+            settings.saveWebImages = settings.saveWebImages !== undefined ? settings.saveWebImages : defaultSettings.saveWebImages;
+            settings.extractTag = settings.extractTag !== undefined ? settings.extractTag : defaultSettings.extractTag;
             // 标签设置保持原样，不使用默认值
         }
 
@@ -125,10 +125,10 @@ async function saveSettings() {
             selectionTag: document.getElementById('selectionTag').value,  // 不使用trim()，允许空值
             imageTag: document.getElementById('imageTag').value,  // 不使用trim()，允许空值
             enableFloatingBall: document.getElementById('enableFloatingBall').checked,
-            jinaApiKey: document.getElementById('jinaApiKey').value || defaultSettings.jinaApiKey,
-            useJinaApiKey: document.getElementById('useJinaApiKey').checked || defaultSettings.useJinaApiKey,
-            saveWebImages: document.getElementById('saveWebImages').checked || defaultSettings.saveWebImages,
-            extractTag: document.getElementById('extractTag').value || defaultSettings.extractTag
+            jinaApiKey: document.getElementById('jinaApiKey').value.trim(),
+            useJinaApiKey: document.getElementById('useJinaApiKey').checked,
+            saveWebImages: document.getElementById('saveWebImages').checked,
+            extractTag: document.getElementById('extractTag').value  // 不使用trim()，允许空值
         };
 
         // 保存到chrome.storage
@@ -173,8 +173,10 @@ async function resetSettings() {
         document.getElementById('promptTemplate').value = settings.promptTemplate;
         document.getElementById('includeSummaryUrl').checked = settings.includeSummaryUrl;
         document.getElementById('includeSelectionUrl').checked = settings.includeSelectionUrl;
+        document.getElementById('includeImageUrl').checked = settings.includeImageUrl;
         document.getElementById('summaryTag').value = settings.summaryTag;
         document.getElementById('selectionTag').value = settings.selectionTag;
+        document.getElementById('imageTag').value = settings.imageTag;
         document.getElementById('enableFloatingBall').checked = settings.enableFloatingBall;
         document.getElementById('jinaApiKey').value = settings.jinaApiKey;
         document.getElementById('useJinaApiKey').checked = settings.useJinaApiKey;
