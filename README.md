@@ -19,6 +19,9 @@ Original Project: [Blinko](https://github.com/blinko-space/blinko) 🔗
 - 💾 Temporary content storage to prevent loss on accidental closure
 - 🎨 Modern UI design for smooth operation
 - 🔔 Smart notification system for timely processing results
+- 🎈 Floating ball for quick access (left-click to summarize, right-click to extract content)
+- 🔍 Jina Reader integration for better content extraction
+- 🖼️ Optional web image link preservation in extracted content
 
 ## 🔧 Installation
 
@@ -95,6 +98,20 @@ Customize summary prompt template using `{content}` as placeholder for web conte
 
 Configure whether to include source URLs for page summaries, text selections, and image saves. When enabled, links are added in Markdown format.
 
+#### Jina Reader Settings 🔍
+
+- **API Key**: Optional Jina Reader API key for faster content extraction
+- **Save Image Links**: Toggle whether to include image links in extracted content
+- **Extract Tag**: Default tag for extracted content (e.g., #web/extract)
+
+### 🎈 Floating Ball
+
+The floating ball provides quick access to core features:
+- Left-click: Generate AI summary of current page
+- Right-click: Extract clean content using Jina Reader
+- Drag to reposition
+- Different loading animations for different operations (green for summary, purple for extraction)
+
 ## ❗ Troubleshooting
 
 1. **Cannot Extract Content** 🚫
@@ -113,6 +130,13 @@ Configure whether to include source URLs for page summaries, text selections, an
    - Check network connection
 
 ## 🔄 Changelog
+
+### v1.8.0
+- ✨ Added Jina Reader integration for better content extraction
+- 🎈 Enhanced floating ball with dual functions (left-click summary, right-click extract)
+- 🎨 Added distinct loading animations for different operations
+- 🖼️ Added option to preserve web image links in extracted content
+- 🏷️ Added customizable tag for extracted content
 
 ### v1.5.0
 - ✨ Added right-click save web images feature
