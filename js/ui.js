@@ -75,7 +75,7 @@ function clearSummaryPreview() {
     }
 }
 
-// 显示总结���览
+// 显示总结预览
 async function showSummaryPreview(tempData) {
     if (tempData && tempData.summary) {
         document.getElementById('summaryPreview').style.display = 'block';

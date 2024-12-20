@@ -99,7 +99,7 @@ async function uploadImageUrl(imageUrl, settings) {
 }
 
 // 发送内容到Blinko
-async function sendToBlinko(content, url, title, imageAttachment = null) {
+async function sendToBlinko(content, url, title, imageAttachment = null, type = 'summary') {
     try {
         // 获取设置
         const result = await chrome.storage.sync.get('settings');
@@ -113,9 +113,19 @@ async function sendToBlinko(content, url, title, imageAttachment = null) {
         const baseUrl = settings.targetUrl.replace(/\/+$/, '');
         const requestUrl = `${baseUrl}/note/upsert`;
 
+        // 根据不同类型添加不同的标签
+        let finalContent = content;
+        if (type === 'summary' && settings.summaryTag) {
+            finalContent = `${content}\n\n${settings.summaryTag}`;
+        } else if (type === 'extract' && settings.extractTag) {
+            finalContent = `${content}\n\n${settings.extractTag}`;
+        } else if (type === 'image' && settings.imageTag) {
+            finalContent = content ? `${content}\n\n${settings.imageTag}` : settings.imageTag;
+        }
+
         // 构建请求体
         const requestBody = {
-            content: content,
+            content: finalContent,
             type: 0
         };
 

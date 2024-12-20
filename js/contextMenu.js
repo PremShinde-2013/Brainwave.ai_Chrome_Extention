@@ -82,13 +82,8 @@ async function handleContextMenuClick(info, tab) {
                 content = `> 来源：[${tab.title}](${tab.url})`;
             }
 
-            // 添加图片标签
-            if (settings.imageTag) {
-                content += content ? `\n\n${settings.imageTag}` : settings.imageTag;
-            }
-
             // 发送到Blinko，包含图片附件
-            const response = await sendToBlinko(content, tab.url, tab.title, imageAttachment);
+            const response = await sendToBlinko(content, tab.url, tab.title, imageAttachment, 'image');
             
             if (response.success) {
                 // 通知用户保存成功
