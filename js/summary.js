@@ -67,6 +67,7 @@ function initializeSummaryListeners() {
     document.getElementById('cancelEdit').addEventListener('click', async () => {
         try {
             await clearTempSummaryData();
+            await chrome.storage.local.remove('currentSummary');
             clearSummaryPreview();
             showStatus('已取消', 'success');
             setTimeout(hideStatus, 2000);

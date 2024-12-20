@@ -134,8 +134,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // 在popup关闭时通知background
-window.addEventListener('unload', () => {
+window.addEventListener('unload', async () => {
     try {
+        // 如果summaryPreview是隐藏的，说明用户已经取消或保存了内容，这时我们需要清理存储
+        const summaryPreview = document.getElementById('summaryPreview');
+        if (summaryPreview && summaryPreview.style.display === 'none') {
+            await chrome.storage.local.remove('currentSummary');
+        }
+        
         chrome.runtime.sendMessage({ action: "popupClosed" }).catch(() => {
             // 忽略错误，popup关闭时可能会出现连接错误
         });
