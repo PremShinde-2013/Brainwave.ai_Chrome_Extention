@@ -55,8 +55,51 @@ async function getSummaryFromModel(content, settings) {
     }
 }
 
+// 上传图片URL到Blinko
+async function uploadImageUrl(imageUrl, settings) {
+    try {
+        if (!settings.targetUrl || !settings.authKey) {
+            throw new Error('请先配置Blinko API URL和认证密钥');
+        }
+
+        // 构建上传URL（注意：移除v1路径）
+        const baseUrl = settings.targetUrl.replace(/\/v1\/*$/, '');
+        const uploadUrl = `${baseUrl}/file/upload-by-url`;
+
+        const response = await fetch(uploadUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': settings.authKey
+            },
+            body: JSON.stringify({
+                url: imageUrl
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`上传图片失败: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.status !== 200 || !data.filePath) {
+            throw new Error('上传图片响应格式错误');
+        }
+
+        return {
+            name: data.fileName,
+            path: data.filePath,
+            size: data.size,
+            type: data.type
+        };
+    } catch (error) {
+        console.error('上传图片失败:', error);
+        throw error;
+    }
+}
+
 // 发送内容到Blinko
-async function sendToBlinko(content, url, title) {
+async function sendToBlinko(content, url, title, imageAttachment = null) {
     try {
         // 获取设置
         const result = await chrome.storage.sync.get('settings');
@@ -67,8 +110,19 @@ async function sendToBlinko(content, url, title) {
         }
 
         // 构建请求URL，确保不重复添加v1
-        const baseUrl = settings.targetUrl.replace(/\/+$/, ''); // 移除末尾的斜杠
+        const baseUrl = settings.targetUrl.replace(/\/+$/, '');
         const requestUrl = `${baseUrl}/note/upsert`;
+
+        // 构建请求体
+        const requestBody = {
+            content: content,
+            type: 0
+        };
+
+        // 如果有图片附件，添加到请求中
+        if (imageAttachment) {
+            requestBody.attachments = [imageAttachment];
+        }
 
         // 发送请求
         const response = await fetch(requestUrl, {
@@ -77,9 +131,7 @@ async function sendToBlinko(content, url, title) {
                 'Content-Type': 'application/json',
                 'Authorization': settings.authKey
             },
-            body: JSON.stringify({
-                content: content
-            })
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
@@ -161,5 +213,6 @@ export {
     getFullApiUrl,
     getSummaryFromModel,
     sendToBlinko,
-    sendToTarget
+    sendToTarget,
+    uploadImageUrl
 }; 
