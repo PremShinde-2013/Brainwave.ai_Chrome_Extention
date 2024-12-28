@@ -6,6 +6,7 @@ A Chrome extension for Blinko that uses AI to automatically extract and summariz
 
 Original Project: [Blinko](https://github.com/blinko-space/blinko) 🔗
 [Chrome Store](https://chromewebstore.google.com/detail/blinko%E7%BD%91%E9%A1%B5%E5%86%85%E5%AE%B9%E6%8F%90%E5%8F%96%E6%80%BB%E7%BB%93/gpdobkhkjbgbgllpkhaomajicoaccjjo?hl=zh-CN&utm_source=ext_sidebar)
+[Firefox Store](https://addons.mozilla.org/addon/blinko-extension/)
 
 ## ✨ Features
 
@@ -129,41 +130,3 @@ The floating ball provides quick access to core features:
    - Confirm target URL is correct
    - Verify auth key is valid
    - Check network connection
-
-## 🔄 Changelog
-
-### v1.8.0
-- ✨ Added Jina Reader integration for better content extraction
-- 🎈 Enhanced floating ball with dual functions (left-click summary, right-click extract)
-- 🎨 Added distinct loading animations for different operations
-- 🖼️ Added option to preserve web image links in extracted content
-- 🏷️ Added customizable tag for extracted content
-
-### v1.5.0
-- ✨ Added right-click save web images feature
-- 🔔 Enhanced notification system for summary completion
-- 💾 Improved content persistence storage
-- 🎨 Enhanced UI interaction experience
-- 🛠️ Fixed summary content save and cancel functionality
-- 🐛 Fixed multiple stability issues
-
-### v1.2.0
-- ✨ Optimized URL configuration, now only need to fill up to /v1
-- 🔄 Added support for auto-fetching AI config from Blinko
-- 🎨 Improved settings interface prompts
-- 🛠️ Optimized URL handling logic
-- 🐛 Enhanced configuration process UX
-- 🎈 Added floating ball feature for one-click web summary upload
-
-### v1.1.0
-- ✨ Added quick note feature
-- 🔄 Optimized temporary content storage
-- 🎨 New modern UI design
-- 🏷️ Added custom tag support
-- 🐛 Fixed multiple known issues
-
-### v1.0.0
-- 🚀 Initial release
-- 📄 Web content summarization
-- ✂️ Text selection save
-- ⚙️ Custom settings support
