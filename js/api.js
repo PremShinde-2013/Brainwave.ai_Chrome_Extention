@@ -55,26 +55,27 @@ async function getSummaryFromModel(content, settings) {
     }
 }
 
-// 上传图片URL到Blinko
-async function uploadImageUrl(imageUrl, settings) {
+// 上传图片文件到Blinko
+async function uploadFile(file, settings) {
     try {
         if (!settings.targetUrl || !settings.authKey) {
             throw new Error('请先配置Blinko API URL和认证密钥');
         }
 
-        // 构建上传URL（注意：移除v1路径）
+        // 构建上传URL
         const baseUrl = settings.targetUrl.replace(/\/v1\/*$/, '');
-        const uploadUrl = `${baseUrl}/file/upload-by-url`;
+        const uploadUrl = `${baseUrl}/file/upload`;
+
+        // 创建FormData对象
+        const formData = new FormData();
+        formData.append('file', file);
 
         const response = await fetch(uploadUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': settings.authKey
             },
-            body: JSON.stringify({
-                url: imageUrl
-            })
+            body: formData
         });
 
         if (!response.ok) {
@@ -224,5 +225,5 @@ export {
     getSummaryFromModel,
     sendToBlinko,
     sendToTarget,
-    uploadImageUrl
-}; 
+    uploadFile
+};

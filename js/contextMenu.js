@@ -1,4 +1,4 @@
-import { sendToBlinko, sendToTarget, uploadImageUrl } from './api.js';
+import { sendToBlinko, sendToTarget, uploadFile } from './api.js';
 import { showSuccessIcon } from './ui.js';
 import { handleContentRequest } from './messageHandler.js';
 
@@ -104,8 +104,13 @@ async function handleContextMenuClick(info, tab) {
                 throw new Error('未找到设置信息');
             }
 
-            // 先上传图片
-            const imageAttachment = await uploadImageUrl(info.srcUrl, settings);
+            // 获取图片文件
+            const imageResponse = await fetch(info.srcUrl);
+            const blob = await imageResponse.blob();
+            const file = new File([blob], 'image.png', { type: blob.type });
+            
+            // 上传图片文件
+            const imageAttachment = await uploadFile(file, settings);
 
             // 构建Markdown格式的图片链接
             let content = '';
@@ -178,4 +183,4 @@ async function handleContextMenuClick(info, tab) {
 export {
     initializeContextMenu,
     handleContextMenuClick
-}; 
+};
