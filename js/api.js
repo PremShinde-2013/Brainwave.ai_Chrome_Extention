@@ -114,14 +114,31 @@ async function sendToBlinko(content, url, title, imageAttachment = null, type = 
         const baseUrl = settings.targetUrl.replace(/\/+$/, '');
         const requestUrl = `${baseUrl}/note/upsert`;
 
-        // 根据不同类型添加不同的标签
+        // 根据不同类型添加不同的标签和URL
         let finalContent = content;
+        
+        // 根据设置和类型决定是否添加URL
+        if (url && (
+            (type === 'summary' && settings.includeSummaryUrl) ||
+            (type === 'extract' && settings.includeSelectionUrl) ||
+            (type === 'image' && settings.includeImageUrl)
+        )) {
+            // 对于图片类型，使用不同的链接格式
+            if (type === 'image') {
+                finalContent = finalContent || '';  // 确保finalContent不是undefined
+                finalContent = `${finalContent}${finalContent ? '\n\n' : ''}> 来源：[${title || url}](${url})`;
+            } else {
+                finalContent = `${finalContent}\n\n原文链接：[${title || url}](${url})`;
+            }
+        }
+
+        // 添加标签
         if (type === 'summary' && settings.summaryTag) {
-            finalContent = `${content}\n\n${settings.summaryTag}`;
+            finalContent = `${finalContent}\n\n${settings.summaryTag}`;
         } else if (type === 'extract' && settings.extractTag) {
-            finalContent = `${content}\n\n${settings.extractTag}`;
+            finalContent = `${finalContent}\n\n${settings.extractTag}`;
         } else if (type === 'image' && settings.imageTag) {
-            finalContent = content ? `${content}\n\n${settings.imageTag}` : settings.imageTag;
+            finalContent = finalContent ? `${finalContent}\n\n${settings.imageTag}` : settings.imageTag;
         }
 
         // 构建请求体
@@ -157,73 +174,9 @@ async function sendToBlinko(content, url, title, imageAttachment = null, type = 
     }
 }
 
-// 发送内容到目标
-async function sendToTarget(content, settings, url, retryCount = 0, title = '', isSelection = false) {
-    if (!settings.targetUrl) {
-        throw new Error('请设置目标URL');
-    }
-
-    if (!settings.authKey) {
-        throw new Error('请设置认证密钥');
-    }
-
-    try {
-        let finalContent = content;
-        // 根据不同场景和设置决定是否添加URL
-        if (url && ((isSelection && settings.includeSelectionUrl) || (!isSelection && settings.includeSummaryUrl))) {
-            finalContent = `${finalContent}\n\n原文链接：[${title || url}](${url})`;
-        }
-
-        // 获取完整的API URL
-        const fullUrl = getFullApiUrl(settings.targetUrl, '/note/upsert');
-
-        const response = await fetch(fullUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': settings.authKey
-            },
-            body: JSON.stringify({
-                content: finalContent
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // 显示成功图标
-        try {
-            await chrome.action.setIcon({
-                path: chrome.runtime.getURL("images/icon128_success.png")
-            });
-            // 3秒后恢复原始图标
-            setTimeout(async () => {
-                try {
-                    await chrome.action.setIcon({
-                        path: chrome.runtime.getURL("images/icon128.png")
-                    });
-                } catch (error) {
-                    console.error('恢复图标失败:', error);
-                }
-            }, 3000);
-        } catch (error) {
-            console.error('设置成功图标失败:', error);
-        }
-
-        return response;
-    } catch (error) {
-        if (retryCount < 3) {
-            return sendToTarget(content, settings, url, retryCount + 1, title, isSelection);
-        }
-        throw new Error(`发送失败: ${error.message}`);
-    }
-}
-
 export {
     getFullApiUrl,
     getSummaryFromModel,
     sendToBlinko,
-    sendToTarget,
     uploadFile
 };

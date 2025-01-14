@@ -88,12 +88,16 @@ function initializeSummaryListeners() {
             // 获取当前总结数据，判断是否是提取场景
             const currentSummary = await chrome.storage.local.get('currentSummary');
             const isExtractOnly = currentSummary.currentSummary?.isExtractOnly;
+            const url = currentSummary.currentSummary?.url;
+            const title = currentSummary.currentSummary?.title;
 
             // 发送到background处理
             const response = await chrome.runtime.sendMessage({
                 action: 'saveSummary',
                 content: summaryText,
-                type: isExtractOnly ? 'extract' : 'summary'
+                type: isExtractOnly ? 'extract' : 'summary',
+                url: url,
+                title: title
             });
 
             if (response && response.success) {

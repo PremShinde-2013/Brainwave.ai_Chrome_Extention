@@ -5,6 +5,7 @@ function extractPageContent() {
         const content = document.body.innerText
             .replace(/[\n\r]+/g, '\n') // 将多个换行符替换为单个
             .replace(/\s+/g, ' ') // 将多个空格替换为单个
+            .replace(/原文链接：\[.*?\]\(.*?\)/g, '') // 移除可能已存在的原文链接
             .trim(); // 移除首尾空白
         
         return content;

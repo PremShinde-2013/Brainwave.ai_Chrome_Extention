@@ -29,10 +29,9 @@ async function getWebContent(url, settings) {
             throw new Error('API返回格式错误');
         }
 
-        // 组织返回内容
+        // 组织返回内容，不添加链接
         let content = `# ${data.data.title}\n\n`;
         content += data.data.content;
-        content += `\n\n原文链接：[${data.data.title}](${data.data.url})`;
 
         return {
             success: true,

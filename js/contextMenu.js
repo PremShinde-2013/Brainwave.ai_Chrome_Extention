@@ -1,4 +1,4 @@
-import { sendToBlinko, sendToTarget, uploadFile } from './api.js';
+import { sendToBlinko, uploadFile } from './api.js';
 import { showSuccessIcon } from './ui.js';
 import { handleContentRequest } from './messageHandler.js';
 
@@ -57,22 +57,19 @@ async function handleContextMenuClick(info, tab) {
                 throw new Error('未找到设置信息');
             }
 
-            // 准备最终内容
-            let finalContent = info.selectionText;
-            if (settings.selectionTag) {
-                finalContent = finalContent.trim() + '\n' + settings.selectionTag;
-            }
+            // 准备内容
+            let content = info.selectionText.trim();
 
-            const response = await sendToTarget(
-                finalContent,
-                settings,
+            // 发送到Blinko
+            const response = await sendToBlinko(
+                content,
                 tab.url,
-                0,
                 tab.title,
-                true  // 这是划词场景
+                null,
+                'extract'  // 划词保存使用extract类型
             );
             
-            if (response.ok) {
+            if (response.success) {
                 showSuccessIcon();
                 chrome.notifications.create({
                     type: 'basic',
@@ -81,7 +78,7 @@ async function handleContextMenuClick(info, tab) {
                     message: '已成功发送选中文本到Blinko'
                 });
             } else {
-                throw new Error(`发送选中文本失败，状态码: ${response.status}`);
+                throw new Error(response.error || '发送选中文本失败');
             }
         } catch (error) {
             console.error('发送选中文本失败:', error);
@@ -112,16 +109,8 @@ async function handleContextMenuClick(info, tab) {
             // 上传图片文件
             const imageAttachment = await uploadFile(file, settings);
 
-            // 构建Markdown格式的图片链接
-            let content = '';
-            
-            // 如果设置中选择包含URL，则添加原网页链接
-            if (settings.includeImageUrl) {
-                content = `> 来源：[${tab.title}](${tab.url})`;
-            }
-
             // 发送到Blinko，包含图片附件
-            const response = await sendToBlinko(content, tab.url, tab.title, imageAttachment, 'image');
+            const response = await sendToBlinko('', tab.url, tab.title, imageAttachment, 'image');
             
             if (response.success) {
                 // 通知用户保存成功

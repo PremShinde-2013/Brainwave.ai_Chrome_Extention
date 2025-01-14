@@ -26,16 +26,16 @@ const defaultSettings = {
 *   总结的末尾无需再进行总结，有一句话总结代替。
 以下是网页内容：{content}`,
     includeSummaryUrl: true,    // 总结笔记是否包含URL
-    includeSelectionUrl: false, // 划词保存是否包含URL
-    includeImageUrl: true,     // 图片保存是否包含URL
+    includeSelectionUrl: true,  // 划词保存是否包含URL
+    includeImageUrl: true,      // 图片保存是否包含URL
     summaryTag: '#网页/总结',   // 网页总结的标签
-    selectionTag: '#网页/摘录',      // 划词保存的标签
-    imageTag: '#网页/图片',         // 图片保存的标签
-    enableFloatingBall: true,    // 是否启用悬浮球
-    jinaApiKey: '',             // Jina Reader API Key
-    useJinaApiKey: false,       // 是否使用API Key加速
-    saveWebImages: false,       // 是否保存网页图片链接
-    extractTag: '#网页/剪藏'     // 网页剪藏的标签
+    selectionTag: '#网页/摘录',  // 划词保存的标签
+    imageTag: '#网页/图片',     // 图片保存的标签
+    extractTag: '#网页/剪藏',   // 网页剪藏的标签
+    enableFloatingBall: true,   // 是否启用悬浮球
+    jinaApiKey: '',            // Jina Reader API Key
+    useJinaApiKey: false,      // 是否使用API Key加速
+    saveWebImages: false       // 是否保存网页图片链接
 };
 
 // 加载设置

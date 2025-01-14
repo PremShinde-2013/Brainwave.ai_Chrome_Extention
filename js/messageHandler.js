@@ -1,4 +1,4 @@
-import { getSummaryFromModel, sendToBlinko, sendToTarget } from './api.js';
+import { getSummaryFromModel, sendToBlinko } from './api.js';
 import { getWebContent } from './jinaReader.js';
 import { getSummaryState, updateSummaryState, clearSummaryState, saveSummaryToStorage } from './summaryState.js';
 
@@ -31,7 +31,8 @@ async function handleContentRequest(request) {
             if (!response.success) {
                 throw new Error(response.error);
             }
-            summary = response.content;
+            // 移除可能已存在的原文链接
+            summary = response.content.replace(/原文链接：\[.*?\]\(.*?\)/g, '').trim();
         } else {
             // 检查必要的设置是否存在
             if (!settings.modelUrl || !settings.apiKey || !settings.modelName) {
@@ -71,7 +72,8 @@ async function handleContentRequest(request) {
                 status: 'completed',
                 summary: summary,
                 url: request.url,
-                title: request.title
+                title: request.title,
+                isExtractOnly: request.isExtractOnly
             });
 
             // 保存到storage
@@ -258,7 +260,8 @@ async function handleFloatingBallRequest(request) {
             if (!response.success) {
                 throw new Error(response.error);
             }
-            summary = response.content;
+            // 移除可能已存在的原文链接
+            summary = response.content.replace(/原文链接：\[.*?\]\(.*?\)/g, '').trim();
         } else {
             // 检查必要的设置是否存在
             if (!settings.modelUrl || !settings.apiKey || !settings.modelName) {
