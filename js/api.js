@@ -2,12 +2,16 @@
 function getFullApiUrl(baseUrl, endpoint) {
     try {
         const url = new URL(baseUrl);
-        const pathParts = url.pathname.split('/');
-        const v1Index = pathParts.indexOf('v1');
-        if (v1Index === -1) {
-            throw new Error('URL格式不正确，需要包含/v1路径');
+        // 检查是否已经包含了完整的API路径
+        if (baseUrl.includes('/v1/chat/completions')) {
+            return baseUrl;
         }
-        return url.origin + pathParts.slice(0, v1Index + 1).join('/') + endpoint;
+        // 如果URL中包含/v1，则使用它之前的部分作为基础URL
+        if (baseUrl.includes('/v1')) {
+            return baseUrl.split('/v1')[0] + '/v1' + endpoint;
+        }
+        // 如果URL不包含/v1，则直接添加
+        return baseUrl.replace(/\/+$/, '') + '/v1' + endpoint;
     } catch (error) {
         console.error('解析URL时出错:', error);
         throw new Error('URL格式不正确: ' + error.message);
