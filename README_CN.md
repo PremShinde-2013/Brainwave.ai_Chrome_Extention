@@ -6,7 +6,7 @@
 
 原项目地址: [Blinko](https://github.com/blinko-space/blinko) 🔗
 [Chrome 商店链接](https://chromewebstore.google.com/detail/blinko%E7%BD%91%E9%A1%B5%E5%86%85%E5%AE%B9%E6%8F%90%E5%8F%96%E6%80%BB%E7%BB%93/gpdobkhkjbgbgllpkhaomajicoaccjjo?hl=zh-CN&utm_source=ext_sidebar)
-[Firefox Store](https://addons.mozilla.org/addon/blinko-extension/)
+[Firefox Version](https://github.com/BryceWG/Blinko-Firefox-Extension)
 
 ## ✨ 功能特点
 
