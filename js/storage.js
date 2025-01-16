@@ -1,6 +1,5 @@
 // 临时存储键
 const TEMP_STORAGE_KEY = 'tempSummaryData';
-const QUICK_NOTE_KEY = 'quickNoteData';  // 快捷记录的存储键
 
 // 保存临时总结数据
 async function saveTempSummaryData(data) {
@@ -35,7 +34,6 @@ async function loadTempSummaryData() {
 
 export {
     TEMP_STORAGE_KEY,
-    QUICK_NOTE_KEY,
     saveTempSummaryData,
     clearTempSummaryData,
     loadTempSummaryData

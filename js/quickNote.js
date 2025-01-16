@@ -1,20 +1,19 @@
-import { QUICK_NOTE_KEY } from './storage.js';
 import { showStatus } from './ui.js';
 
 // 保存快捷记录内容
 function saveQuickNote() {
     const input = document.getElementById('quickNoteInput');
     if (input && input.value.trim()) {
-        chrome.storage.local.set({ [QUICK_NOTE_KEY]: input.value });
+        chrome.storage.local.set({ 'quickNote': input.value });
     }
 }
 
 // 加载快捷记录内容
 async function loadQuickNote() {
     try {
-        const result = await chrome.storage.local.get(QUICK_NOTE_KEY);
-        if (result[QUICK_NOTE_KEY]) {
-            document.getElementById('quickNoteInput').value = result[QUICK_NOTE_KEY];
+        const result = await chrome.storage.local.get('quickNote');
+        if (result.quickNote) {
+            document.getElementById('quickNoteInput').value = result.quickNote;
         }
     } catch (error) {
         console.error('加载快捷记录失败:', error);
@@ -27,7 +26,7 @@ function clearQuickNote() {
     if (input) {
         input.value = '';
         // 清除storage中的数据
-        chrome.storage.local.remove(QUICK_NOTE_KEY);
+        chrome.storage.local.remove('quickNote');
     }
 }
 
@@ -75,7 +74,7 @@ async function sendQuickNote() {
             showStatus('发送成功', 'success');
             // 发送成功后清除内容和存储
             input.value = '';
-            await chrome.storage.local.remove(QUICK_NOTE_KEY);
+            await chrome.storage.local.remove('quickNote');
         } else {
             showStatus('发送失败: ' + (response?.error || '未知错误'), 'error');
         }
