@@ -1,20 +1,22 @@
-// 处理标签页切换
-function openTab(evt, tabName) {
-    const tabcontent = document.getElementsByClassName("tabcontent");
-    for (let i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
+// 显示状态信息
+function showStatus(message, type = 'loading') {
+    const statusDiv = document.getElementById('status');
+    if (statusDiv) {
+        statusDiv.textContent = message;
+        statusDiv.className = type;
+        statusDiv.style.display = 'block';
     }
-
-    const tablinks = document.getElementsByClassName("tablinks");
-    for (let i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
 }
 
-// 更新扩展图标为成功状态
+// 隐藏状态信息
+function hideStatus() {
+    const statusDiv = document.getElementById('status');
+    if (statusDiv) {
+        statusDiv.style.display = 'none';
+    }
+}
+
+// 显示成功图标
 async function showSuccessIcon() {
     try {
         await chrome.action.setIcon({
@@ -33,24 +35,6 @@ async function showSuccessIcon() {
         }, 3000);
     } catch (error) {
         console.error('设置成功图标失败:', error);
-    }
-}
-
-// 显示状态信息
-function showStatus(message, type) {
-    const statusDiv = document.getElementById('status');
-    if (statusDiv) {
-        statusDiv.textContent = message;
-        statusDiv.className = type;
-        statusDiv.style.display = 'block';
-    }
-}
-
-// 隐藏状态信息
-function hideStatus() {
-    const statusDiv = document.getElementById('status');
-    if (statusDiv) {
-        statusDiv.style.display = 'none';
     }
 }
 
@@ -91,7 +75,26 @@ async function showSummaryPreview(tempData) {
 
 // 初始化UI事件监听器
 function initializeUIListeners() {
-    // 绑定密钥显示/隐藏事件
+    // 标签页切换
+    document.querySelectorAll('.tablinks').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const tabName = e.target.getAttribute('data-tab');
+            
+            // 更新按钮状态
+            document.querySelectorAll('.tablinks').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            e.target.classList.add('active');
+            
+            // 更新内容显示
+            document.querySelectorAll('.tabcontent').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(tabName).style.display = 'block';
+        });
+    });
+
+    // 密钥显示/隐藏
     document.querySelectorAll('.toggle-visibility').forEach(button => {
         button.addEventListener('click', function() {
             const input = this.previousElementSibling;
@@ -102,20 +105,12 @@ function initializeUIListeners() {
             }
         });
     });
-
-    // 标签切换事件
-    document.querySelectorAll('.tablinks').forEach(button => {
-        button.addEventListener('click', function(event) {
-            openTab(event, this.dataset.tab);
-        });
-    });
 }
 
 export {
-    openTab,
-    showSuccessIcon,
     showStatus,
     hideStatus,
+    showSuccessIcon,
     clearSummaryPreview,
     showSummaryPreview,
     initializeUIListeners

@@ -14,10 +14,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (tab && tab.id === result.notificationTabId) {
                 // 清除标记
                 await chrome.storage.local.remove(['notificationClicked', 'notificationTabId']);
-                // 切换到主页面
-                const mainTab = document.querySelector('.tablinks[data-tab="main"]');
-                if (mainTab) {
-                    mainTab.click();
+                // 切换到快捷记录页面
+                const quicknoteTab = document.querySelector('.tablinks[data-tab="quicknote"]');
+                if (quicknoteTab) {
+                    quicknoteTab.click();
                 }
             }
         }
@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         // 加载快捷记录内容
         await loadQuickNote();
 
-        // 显示主页面
-        document.getElementById('main').style.display = 'block';
+        // 显示常用页面
+        document.getElementById('common').style.display = 'block';
 
         // 初始化所有事件监听器
         initializeUIListeners();
