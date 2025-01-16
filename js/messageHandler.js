@@ -187,6 +187,29 @@ async function handleSaveSummary(request) {
             if (settings.includeQuickNoteUrl && request.url) {
                 finalContent = `${finalContent}\n\n原文链接：[${request.title || request.url}](${request.url})`;
             }
+
+            try {
+                const response = await sendToBlinko(
+                    finalContent,
+                    url,
+                    title,
+                    request.attachments,  // 传递附件列表
+                    request.type || 'summary'
+                );
+                
+                if (response.success) {
+                    // 如果是总结内容，清除存储
+                    if (!request.type || request.type !== 'quickNote') {
+                        await chrome.storage.local.remove('currentSummary');
+                        await clearSummaryState();
+                    }
+                    return { success: true };
+                } else {
+                    throw new Error(`保存失败: ${response.status}`);
+                }
+            } catch (error) {
+                throw new Error(`发送内容失败: ${error.message}`);
+            }
         } else {
             // 如果是总结内容或提取内容
             if (!request.content || !request.content.trim()) {

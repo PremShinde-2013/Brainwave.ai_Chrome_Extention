@@ -20,11 +20,19 @@ function initializeContextMenu() {
             parentId: "blinkoExtension"
         });
 
-        // 添加预存到快捷记录菜单
+        // 添加预存到快捷记录菜单（文本）
         chrome.contextMenus.create({
             id: "saveToQuickNote",
             title: "预存到快捷记录",
             contexts: ["selection"],
+            parentId: "blinkoExtension"
+        });
+
+        // 添加预存到快捷记录菜单（图片）
+        chrome.contextMenus.create({
+            id: "saveImageToQuickNote",
+            title: "预存到快捷记录",
+            contexts: ["image"],
             parentId: "blinkoExtension"
         });
 
@@ -123,6 +131,52 @@ async function handleContextMenuClick(info, tab) {
             });
         } catch (error) {
             console.error('保存到快捷记录失败:', error);
+            chrome.notifications.create({
+                type: 'basic',
+                iconUrl: 'images/icon128.png',
+                title: '保存失败',
+                message: error.message
+            });
+        }
+    }
+
+    if (info.menuItemId === "saveImageToQuickNote") {
+        try {
+            // 获取设置
+            const result = await chrome.storage.sync.get('settings');
+            const settings = result.settings;
+            
+            if (!settings) {
+                throw new Error('未找到设置信息');
+            }
+
+            // 获取图片文件
+            const imageResponse = await fetch(info.srcUrl);
+            const blob = await imageResponse.blob();
+            const file = new File([blob], 'image.png', { type: blob.type });
+            
+            // 上传图片文件
+            const imageAttachment = await uploadFile(file, settings);
+
+            // 获取当前快捷记录的附件列表
+            const quickNoteResult = await chrome.storage.local.get(['quickNoteAttachments']);
+            let attachments = quickNoteResult.quickNoteAttachments || [];
+
+            // 添加新的附件
+            attachments.push(imageAttachment);
+
+            // 保存更新后的附件列表
+            await chrome.storage.local.set({ 'quickNoteAttachments': attachments });
+            
+            // 显示成功通知
+            chrome.notifications.create({
+                type: 'basic',
+                iconUrl: 'images/icon128.png',
+                title: '已添加到快捷记录',
+                message: '图片已添加到快捷记录中'
+            });
+        } catch (error) {
+            console.error('保存图片到快捷记录失败:', error);
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'images/icon128.png',

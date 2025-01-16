@@ -125,7 +125,8 @@ async function sendToBlinko(content, url, title, imageAttachment = null, type = 
         if (url && (
             (type === 'summary' && settings.includeSummaryUrl) ||
             (type === 'extract' && settings.includeSelectionUrl) ||
-            (type === 'image' && settings.includeImageUrl)
+            (type === 'image' && settings.includeImageUrl) ||
+            (type === 'quickNote' && settings.includeQuickNoteUrl)
         )) {
             // 对于图片类型，使用不同的链接格式
             if (type === 'image') {
@@ -151,8 +152,12 @@ async function sendToBlinko(content, url, title, imageAttachment = null, type = 
             type: 0
         };
 
-        // 如果有图片附件，添加到请求中
-        if (imageAttachment) {
+        // 处理附件
+        if (Array.isArray(imageAttachment)) {
+            // 如果是数组，直接使用
+            requestBody.attachments = imageAttachment;
+        } else if (imageAttachment) {
+            // 如果是单个附件，转换为数组
             requestBody.attachments = [imageAttachment];
         }
 
@@ -166,11 +171,15 @@ async function sendToBlinko(content, url, title, imageAttachment = null, type = 
             body: JSON.stringify(requestBody)
         });
 
+        const data = await response.json();
+
+        // 检查HTTP状态码
         if (!response.ok) {
-            throw new Error(`保存失败: ${response.status}`);
+            throw new Error(`HTTP错误: ${response.status} ${data.message || response.statusText}`);
         }
 
-        const data = await response.json();
+        // 如果能解析响应数据，就认为请求成功了
+        // Blinko API 在成功时可能不会返回特定的状态字段
         return { success: true, data };
     } catch (error) {
         console.error('发送到Blinko失败:', error);
