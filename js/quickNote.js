@@ -27,7 +27,7 @@ async function loadQuickNote() {
 }
 
 // 更新附件列表显示
-function updateAttachmentList(attachments) {
+async function updateAttachmentList(attachments) {
     const attachmentItems = document.getElementById('attachmentItems');
     const clearAttachmentsBtn = document.getElementById('clearAttachments');
     
@@ -37,6 +37,15 @@ function updateAttachmentList(attachments) {
     // 如果有附件，显示清除按钮
     clearAttachmentsBtn.style.display = attachments.length > 0 ? 'block' : 'none';
 
+    // 获取设置信息
+    const result = await chrome.storage.sync.get('settings');
+    const settings = result.settings;
+    
+    if (!settings || !settings.targetUrl) {
+        console.error('未找到设置信息');
+        return;
+    }
+
     // 添加附件项
     attachments.forEach((attachment, index) => {
         const item = document.createElement('div');
@@ -44,8 +53,19 @@ function updateAttachmentList(attachments) {
         
         // 创建图片预览
         const img = document.createElement('img');
-        img.src = attachment.path;  // 使用附件的路径
-        img.alt = attachment.name;
+        // 确保使用完整的图片URL
+        img.src = attachment.path.startsWith('http') ? attachment.path : `${settings.targetUrl.replace(/\/v1\/*$/, '')}${attachment.path}`;
+        img.alt = attachment.name || '附件图片';
+        img.onerror = () => {
+            // 如果图片加载失败，显示文件名
+            img.style.display = 'none';
+            const textSpan = document.createElement('span');
+            textSpan.textContent = attachment.name || '图片';
+            textSpan.style.display = 'block';
+            textSpan.style.padding = '8px';
+            textSpan.style.textAlign = 'center';
+            item.insertBefore(textSpan, img);
+        };
         item.appendChild(img);
         
         // 创建删除按钮

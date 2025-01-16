@@ -126,7 +126,9 @@ async function sendToBlinko(content, url, title, imageAttachment = null, type = 
             (type === 'summary' && settings.includeSummaryUrl) ||
             (type === 'extract' && settings.includeSelectionUrl) ||
             (type === 'image' && settings.includeImageUrl) ||
-            (type === 'quickNote' && settings.includeQuickNoteUrl)
+            // 对于快捷记录，只有在内容中没有链接时才添加
+            (type === 'quickNote' && settings.includeQuickNoteUrl && 
+             !finalContent.includes(`原文链接：[${title || url}](${url})`))
         )) {
             // 对于图片类型，使用不同的链接格式
             if (type === 'image') {

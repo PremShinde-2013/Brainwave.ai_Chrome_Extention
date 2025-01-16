@@ -183,10 +183,6 @@ async function handleSaveSummary(request) {
                 throw new Error('请输入笔记内容');
             }
             finalContent = request.content.trim();
-            // 如果设置了包含URL且有URL信息，添加URL
-            if (settings.includeQuickNoteUrl && request.url) {
-                finalContent = `${finalContent}\n\n原文链接：[${request.title || request.url}](${request.url})`;
-            }
 
             try {
                 const response = await sendToBlinko(
