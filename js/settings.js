@@ -28,6 +28,7 @@ const defaultSettings = {
     includeSummaryUrl: true,    // 总结笔记是否包含URL
     includeSelectionUrl: true,  // 划词保存是否包含URL
     includeImageUrl: true,      // 图片保存是否包含URL
+    includeQuickNoteUrl: false, // 快捷记录是否包含URL
     summaryTag: '#网页/总结',   // 网页总结的标签
     selectionTag: '#网页/摘录',  // 划词保存的标签
     imageTag: '#网页/图片',     // 图片保存的标签
@@ -55,6 +56,7 @@ async function loadSettings() {
             settings.includeSummaryUrl = settings.includeSummaryUrl !== undefined ? settings.includeSummaryUrl : defaultSettings.includeSummaryUrl;
             settings.includeSelectionUrl = settings.includeSelectionUrl !== undefined ? settings.includeSelectionUrl : defaultSettings.includeSelectionUrl;
             settings.includeImageUrl = settings.includeImageUrl !== undefined ? settings.includeImageUrl : defaultSettings.includeImageUrl;
+            settings.includeQuickNoteUrl = settings.includeQuickNoteUrl !== undefined ? settings.includeQuickNoteUrl : defaultSettings.includeQuickNoteUrl;
             settings.enableFloatingBall = settings.enableFloatingBall !== undefined ? settings.enableFloatingBall : defaultSettings.enableFloatingBall;
             settings.jinaApiKey = settings.jinaApiKey || defaultSettings.jinaApiKey;
             settings.useJinaApiKey = settings.useJinaApiKey !== undefined ? settings.useJinaApiKey : defaultSettings.useJinaApiKey;
@@ -77,6 +79,7 @@ async function loadSettings() {
             'includeSummaryUrl': settings.includeSummaryUrl !== false,
             'includeSelectionUrl': settings.includeSelectionUrl !== false,
             'includeImageUrl': settings.includeImageUrl !== false,
+            'includeQuickNoteUrl': settings.includeQuickNoteUrl !== false,
             'summaryTag': settings.summaryTag || '',
             'selectionTag': settings.selectionTag || '',
             'imageTag': settings.imageTag || '',
@@ -121,6 +124,7 @@ async function saveSettings() {
             includeSummaryUrl: document.getElementById('includeSummaryUrl').checked,
             includeSelectionUrl: document.getElementById('includeSelectionUrl').checked,
             includeImageUrl: document.getElementById('includeImageUrl').checked,
+            includeQuickNoteUrl: document.getElementById('includeQuickNoteUrl').checked,
             summaryTag: document.getElementById('summaryTag').value,  // 不使用trim()，允许空值
             selectionTag: document.getElementById('selectionTag').value,  // 不使用trim()，允许空值
             imageTag: document.getElementById('imageTag').value,  // 不使用trim()，允许空值
