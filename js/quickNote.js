@@ -188,6 +188,8 @@ async function sendQuickNote() {
             // 发送成功后清除内容和存储
             input.value = '';
             await chrome.storage.local.remove(['quickNote', 'quickNoteAttachments']);
+            // 立即更新附件列表显示
+            updateAttachmentList([]);
         } else {
             showStatus('发送失败: ' + (response?.error || '未知错误'), 'error');
         }
