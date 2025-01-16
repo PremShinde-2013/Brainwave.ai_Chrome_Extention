@@ -19,7 +19,25 @@ async function loadQuickNote() {
 
         // 加载并显示附件
         if (result.quickNoteAttachments && result.quickNoteAttachments.length > 0) {
-            updateAttachmentList(result.quickNoteAttachments);
+            // 为每个没有localUrl的附件创建本地URL
+            const attachments = await Promise.all(result.quickNoteAttachments.map(async (attachment) => {
+                if (!attachment.localUrl && attachment.originalUrl) {
+                    try {
+                        const response = await fetch(attachment.originalUrl);
+                        const blob = await response.blob();
+                        attachment.localUrl = URL.createObjectURL(blob);
+                    } catch (error) {
+                        console.error('创建本地URL失败:', error);
+                    }
+                }
+                return attachment;
+            }));
+
+            // 更新存储中的附件信息
+            await chrome.storage.local.set({ 'quickNoteAttachments': attachments });
+            
+            // 显示附件
+            updateAttachmentList(attachments);
         }
     } catch (error) {
         console.error('加载快捷记录失败:', error);
@@ -53,8 +71,17 @@ async function updateAttachmentList(attachments) {
         
         // 创建图片预览
         const img = document.createElement('img');
-        // 确保使用完整的图片URL
-        img.src = attachment.path.startsWith('http') ? attachment.path : `${settings.targetUrl.replace(/\/v1\/*$/, '')}${attachment.path}`;
+        
+        // 优先使用本地图片URL，如果不存在则使用Blinko URL
+        if (attachment.localUrl) {
+            img.src = attachment.localUrl;
+        } else if (attachment.path) {
+            // 使用Blinko URL作为后备
+            const baseUrl = settings.targetUrl.replace(/\/v1\/*$/, '').replace(/\/+$/, '');
+            const path = attachment.path.startsWith('/') ? attachment.path : '/' + attachment.path;
+            img.src = baseUrl + path;
+        }
+        
         img.alt = attachment.name || '附件图片';
         img.onerror = () => {
             // 如果图片加载失败，显示文件名
@@ -80,11 +107,43 @@ async function updateAttachmentList(attachments) {
     });
 }
 
+// 清理图片缓存
+function clearImageCache(attachments) {
+    if (Array.isArray(attachments)) {
+        attachments.forEach(attachment => {
+            if (attachment.localUrl) {
+                URL.revokeObjectURL(attachment.localUrl);
+            }
+        });
+    }
+}
+
+// 清除所有附件
+async function clearAttachments() {
+    try {
+        // 获取当前附件列表以清理缓存
+        const result = await chrome.storage.local.get('quickNoteAttachments');
+        if (result.quickNoteAttachments) {
+            clearImageCache(result.quickNoteAttachments);
+        }
+        await chrome.storage.local.remove('quickNoteAttachments');
+        updateAttachmentList([]);
+    } catch (error) {
+        console.error('清除附件失败:', error);
+        showStatus('清除附件失败: ' + error.message, 'error');
+    }
+}
+
 // 移除单个附件
 async function removeAttachment(index) {
     try {
         const result = await chrome.storage.local.get('quickNoteAttachments');
         let attachments = result.quickNoteAttachments || [];
+        
+        // 清理要移除的附件的图片缓存
+        if (attachments[index] && attachments[index].localUrl) {
+            URL.revokeObjectURL(attachments[index].localUrl);
+        }
         
         // 移除指定索引的附件
         attachments.splice(index, 1);
@@ -100,26 +159,21 @@ async function removeAttachment(index) {
     }
 }
 
-// 清除所有附件
-async function clearAttachments() {
-    try {
-        await chrome.storage.local.remove('quickNoteAttachments');
-        updateAttachmentList([]);
-    } catch (error) {
-        console.error('清除附件失败:', error);
-        showStatus('清除附件失败: ' + error.message, 'error');
-    }
-}
-
 // 清除快捷记录内容
 function clearQuickNote() {
     const input = document.getElementById('quickNoteInput');
     if (input) {
         input.value = '';
-        // 清除storage中的数据
-        chrome.storage.local.remove(['quickNote', 'quickNoteAttachments']);
-        // 更新附件列表显示
-        updateAttachmentList([]);
+        // 获取当前附件列表以清理缓存
+        chrome.storage.local.get(['quickNoteAttachments'], result => {
+            if (result.quickNoteAttachments) {
+                clearImageCache(result.quickNoteAttachments);
+            }
+            // 清除storage中的数据
+            chrome.storage.local.remove(['quickNote', 'quickNoteAttachments']);
+            // 更新附件列表显示
+            updateAttachmentList([]);
+        });
     }
 }
 
@@ -185,7 +239,9 @@ async function sendQuickNote() {
 
         if (response && response.success) {
             showStatus('发送成功', 'success');
-            // 发送成功后清除内容和存储
+            // 发送成功后清理图片缓存
+            clearImageCache(attachments);
+            // 清除内容和存储
             input.value = '';
             await chrome.storage.local.remove(['quickNote', 'quickNoteAttachments']);
             // 立即更新附件列表显示
@@ -212,5 +268,6 @@ export {
     clearQuickNote,
     sendQuickNote,
     initializeQuickNoteListeners,
-    updateAttachmentList
+    updateAttachmentList,
+    clearImageCache
 }; 

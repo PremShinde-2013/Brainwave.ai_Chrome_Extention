@@ -162,8 +162,11 @@ async function handleContextMenuClick(info, tab) {
             const quickNoteResult = await chrome.storage.local.get(['quickNoteAttachments']);
             let attachments = quickNoteResult.quickNoteAttachments || [];
 
-            // 添加新的附件
-            attachments.push(imageAttachment);
+            // 添加新的附件，只保存原始URL
+            attachments.push({
+                ...imageAttachment,
+                originalUrl: info.srcUrl // 保存原始URL以便在popup中创建本地URL
+            });
 
             // 保存更新后的附件列表
             await chrome.storage.local.set({ 'quickNoteAttachments': attachments });
