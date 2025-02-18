@@ -1,0 +1,162 @@
+{
+  "popupTitle": {
+    "message": "Blinko Extension",
+    "description": "Popup panel title"
+  },
+  "extensionName": {
+    "message": "Blinko Extension",
+    "description": "Extension name for context menu"
+  },
+  "sendSelectedText": {
+    "message": "Send Selected Text to Blinko",
+    "description": "Context menu for sending selected text"
+  },
+  "saveToQuickNote": {
+    "message": "Save to Quick Note",
+    "description": "Context menu for saving text to quick note"
+  },
+  "saveImageToQuickNote": {
+    "message": "Save Image to Quick Note",
+    "description": "Context menu for saving image to quick note"
+  },
+  "saveImageToBlinko": {
+    "message": "Save Image to Blinko",
+    "description": "Context menu for saving image to Blinko"
+  },
+  "summarizePageContent": {
+    "message": "Summarize Page Content",
+    "description": "Context menu for summarizing page content"
+  },
+  "extractPageContent": {
+    "message": "Extract Page Content",
+    "description": "Context menu for extracting page content"
+  },
+  "notificationSendSuccessTitle": {
+    "message": "Send Success",
+    "description": "Notification title for successful send"
+  },
+  "notificationSendSuccessMessage": {
+    "message": "Selected text has been sent to Blinko successfully.",
+    "description": "Notification message for successful send"
+  },
+  "notificationSendErrorTitle": {
+    "message": "Send Error",
+    "description": "Notification title for failed send"
+  },
+  "notificationExtractSuccessTitle": {
+    "message": "Extract Success",
+    "description": "Notification title for successful content extraction"
+  },
+  "notificationSummarySuccessTitle": {
+    "message": "Summarize Success",
+    "description": "Notification title for successful content summarization"
+  },
+  "notificationExtractSuccessMessage": {
+    "message": "Successfully extracted content from \"%s\" and saved to Blinko",
+    "description": "Notification message for content extraction success"
+  },
+  "notificationSummarySuccessMessage": {
+    "message": "Successfully summarized content from \"%s\" and saved to Blinko",
+    "description": "Notification message for content summarization success"
+  },
+  "notificationExtractSuccessMessagePopup": {
+    "message": "Content extraction for \"%s\" completed. Click on the extension icon to view.",
+    "description": "Notification message for content extraction success when popup is closed"
+  },
+  "notificationSummarySuccessMessagePopup": {
+    "message": "Content summarization for \"%s\" completed. Click on the extension icon to view.",
+    "description": "Notification message for content summarization success when popup is closed"
+  },
+  "notificationExtractErrorTitle": {
+    "message": "Extract Failed",
+    "description": "Notification title for content extraction failure"
+  },
+  "notificationSummaryErrorTitle": {
+    "message": "Summarize Failed",
+    "description": "Notification title for content summarization failure"
+  },
+  "notificationErrorMessage": {
+    "message": "Error during %s \"%s\": %s",
+    "description": "Notification error message with action, title, and error description"
+  },
+  "extractAction": {
+    "message": "Extracting",
+    "description": "The action word when extracting content"
+  },
+  "summaryAction": {
+    "message": "Summarizing",
+    "description": "The action word when summarizing content"
+  },
+  "defaultPage": {
+    "message": "page",
+    "description": "Default string for page name when none provided"
+  },
+  "tabCommon": {
+    "message": "Common",
+    "description": "Common tab text"
+  },
+  "tabQuickNote": {
+    "message": "Quick Note",
+    "description": "Quick note tab text"
+  },
+  "tabSettings": {
+    "message": "Settings",
+    "description": "Settings tab text"
+  },
+  "webSummaryTitle": {
+    "message": "Web Summary",
+    "description": "Web summary section title"
+  },
+  "extractAndSummarizeButton": {
+    "message": "Extract and Summarize Page Content",
+    "description": "Button text for extract and summarize"
+  },
+  "extractContentTitle": {
+    "message": "Extract Web Content",
+    "description": "Extract content section title"
+  },
+  "extractContentButton": {
+    "message": "Extract Web Content",
+    "description": "Button text for content extraction"
+  },
+  "quickNoteTitle": {
+    "message": "Quick Note",
+    "description": "Quick note section title"
+  },
+  "quickNotePlaceholder": {
+    "message": "Enter your notes here, or collect web content via right-click menu...",
+    "description": "Placeholder text for quick note input"
+  },
+  "attachmentListTitle": {
+    "message": "Attachments",
+    "description": "Title for attachment list"
+  },
+  "clearAllButton": {
+    "message": "Clear All",
+    "description": "Button text for clearing all"
+  },
+  "sendButton": {
+    "message": "Send",
+    "description": "Button text for send action"
+  },
+  "clearButton": {
+    "message": "Clear",
+    "description": "Button text for clear action"
+  },
+  "summaryPreviewTitle": {
+    "message": "Summary Preview",
+    "description": "Title for summary preview section"
+  },
+  "summaryTextPlaceholder": {
+    "message": "Summary content will be displayed here...",
+    "description": "Placeholder text for summary content"
+  },
+  "cancelButton": {
+    "message": "Cancel",
+    "description": "Button text for cancel action"
+  },
+  "editAndSaveButton": {
+    "message": "Edit and Save",
+    "description": "Button text for edit and save action"
+  }
+} 

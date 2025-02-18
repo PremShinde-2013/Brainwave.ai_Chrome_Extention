@@ -3,9 +3,45 @@ import { initializeUIListeners, showStatus, hideStatus } from './ui.js';
 import { loadQuickNote, initializeQuickNoteListeners } from './quickNote.js';
 import { checkSummaryState, initializeSummaryListeners, handleSummaryResponse } from './summary.js';
 
+// 初始化国际化文本
+function initializeI18n() {
+    // 替换所有带有 __MSG_ 前缀的文本
+    document.querySelectorAll('*').forEach(element => {
+        // 处理文本内容
+        if (element.childNodes && element.childNodes.length === 1 && element.childNodes[0].nodeType === 3) {
+            const text = element.textContent;
+            if (text.includes('__MSG_')) {
+                const msgName = text.match(/__MSG_(\w+)__/)[1];
+                element.textContent = chrome.i18n.getMessage(msgName);
+            }
+        }
+        
+        // 处理 placeholder 属性
+        if (element.hasAttribute('placeholder')) {
+            const placeholder = element.getAttribute('placeholder');
+            if (placeholder.includes('__MSG_')) {
+                const msgName = placeholder.match(/__MSG_(\w+)__/)[1];
+                element.setAttribute('placeholder', chrome.i18n.getMessage(msgName));
+            }
+        }
+        
+        // 处理 title 属性
+        if (element.hasAttribute('title')) {
+            const title = element.getAttribute('title');
+            if (title.includes('__MSG_')) {
+                const msgName = title.match(/__MSG_(\w+)__/)[1];
+                element.setAttribute('title', chrome.i18n.getMessage(msgName));
+            }
+        }
+    });
+}
+
 // 初始化事件监听器
 document.addEventListener('DOMContentLoaded', async function() {
     try {
+        // 初始化国际化文本
+        initializeI18n();
+
         // 检查是否是通过通知点击打开的
         const result = await chrome.storage.local.get(['notificationClicked', 'notificationTabId', 'quickNote', 'quickNoteAttachments']);
         

@@ -8,14 +8,14 @@ function initializeContextMenu() {
         // 创建父级菜单
         chrome.contextMenus.create({
             id: "blinkoExtension",
-            title: "Blinko Extension",
+            title: chrome.i18n.getMessage("extensionName"),
             contexts: ["all"]
         });
 
         // 创建选中文本菜单
         chrome.contextMenus.create({
             id: "sendSelectedText",
-            title: "发送选中文本到Blinko",
+            title: chrome.i18n.getMessage("sendSelectedText"),
             contexts: ["selection"],
             parentId: "blinkoExtension"
         });
@@ -23,7 +23,7 @@ function initializeContextMenu() {
         // 添加预存到快捷记录菜单（文本）
         chrome.contextMenus.create({
             id: "saveToQuickNote",
-            title: "预存到快捷记录",
+            title: chrome.i18n.getMessage("saveToQuickNote"),
             contexts: ["selection"],
             parentId: "blinkoExtension"
         });
@@ -31,7 +31,7 @@ function initializeContextMenu() {
         // 添加预存到快捷记录菜单（图片）
         chrome.contextMenus.create({
             id: "saveImageToQuickNote",
-            title: "预存到快捷记录",
+            title: chrome.i18n.getMessage("saveImageToQuickNote"),
             contexts: ["image"],
             parentId: "blinkoExtension"
         });
@@ -39,7 +39,7 @@ function initializeContextMenu() {
         // 创建图片右键菜单
         chrome.contextMenus.create({
             id: 'saveImageToBlinko',
-            title: '保存图片到Blinko',
+            title: chrome.i18n.getMessage("saveImageToBlinko"),
             contexts: ['image'],
             parentId: "blinkoExtension"
         });
@@ -47,7 +47,7 @@ function initializeContextMenu() {
         // 创建总结网页内容菜单
         chrome.contextMenus.create({
             id: 'summarizePageContent',
-            title: '总结网页内容',
+            title: chrome.i18n.getMessage("summarizePageContent"),
             contexts: ['page'],
             parentId: "blinkoExtension"
         });
@@ -55,7 +55,7 @@ function initializeContextMenu() {
         // 创建提取网页内容菜单
         chrome.contextMenus.create({
             id: 'extractPageContent',
-            title: '提取网页内容',
+            title: chrome.i18n.getMessage("extractPageContent"),
             contexts: ['page'],
             parentId: "blinkoExtension"
         });

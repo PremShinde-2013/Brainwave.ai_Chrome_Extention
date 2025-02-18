@@ -58,8 +58,8 @@ async function handleContentRequest(request) {
                 chrome.notifications.create({
                     type: 'basic',
                     iconUrl: chrome.runtime.getURL('images/icon128.png'),
-                    title: request.isExtractOnly ? '提取完成' : '总结完成',
-                    message: `已完成对"${request.title || '页面'}"的${request.isExtractOnly ? '内容提取' : '内容总结'}并保存到Blinko`,
+                    title: chrome.i18n.getMessage(request.isExtractOnly ? "notificationExtractSuccessTitle" : "notificationSummarySuccessTitle"),
+                    message: chrome.i18n.getMessage(request.isExtractOnly ? "notificationExtractSuccessMessage" : "notificationSummarySuccessMessage", [request.title || chrome.i18n.getMessage("defaultPage")]),
                     priority: 2
                 });
             } else {
@@ -105,8 +105,8 @@ async function handleContentRequest(request) {
                     chrome.notifications.create({
                         type: 'basic',
                         iconUrl: chrome.runtime.getURL('images/icon128.png'),
-                        title: request.isExtractOnly ? '提取完成' : '总结完成',
-                        message: `已完成对"${request.title || '页面'}"的${request.isExtractOnly ? '内容提取' : '内容总结'}，点击扩展图标查看。`,
+                        title: chrome.i18n.getMessage(request.isExtractOnly ? "notificationExtractSuccessTitle" : "notificationSummarySuccessTitle"),
+                        message: chrome.i18n.getMessage(request.isExtractOnly ? "notificationExtractSuccessMessagePopup" : "notificationSummarySuccessMessagePopup", [request.title || chrome.i18n.getMessage("defaultPage")]),
                         priority: 2
                     });
                 });
@@ -116,8 +116,8 @@ async function handleContentRequest(request) {
                 chrome.notifications.create({
                     type: 'basic',
                     iconUrl: chrome.runtime.getURL('images/icon128.png'),
-                    title: request.isExtractOnly ? '提取完成' : '总结完成',
-                    message: `已完成对"${request.title || '页面'}"的${request.isExtractOnly ? '内容提取' : '内容总结'}，点击扩展图标查看。`,
+                    title: chrome.i18n.getMessage(request.isExtractOnly ? "notificationExtractSuccessTitle" : "notificationSummarySuccessTitle"),
+                    message: chrome.i18n.getMessage(request.isExtractOnly ? "notificationExtractSuccessMessagePopup" : "notificationSummarySuccessMessagePopup", [request.title || chrome.i18n.getMessage("defaultPage")]),
                     priority: 2
                 });
             }
@@ -151,9 +151,13 @@ async function handleContentRequest(request) {
         // 总是显示错误通知
         chrome.notifications.create({
             type: 'basic',
-            iconUrl: 'images/icon128.png',
-            title: request.isExtractOnly ? '提取失败' : '总结失败',
-            message: `${request.isExtractOnly ? '提取' : '总结'}"${request.title || '页面'}"时出错: ${error.message}`
+            iconUrl: chrome.runtime.getURL('images/icon128.png'),
+            title: chrome.i18n.getMessage(request.isExtractOnly ? "notificationExtractErrorTitle" : "notificationSummaryErrorTitle"),
+            message: chrome.i18n.getMessage("notificationErrorMessage", [
+                request.isExtractOnly ? chrome.i18n.getMessage("extractAction") : chrome.i18n.getMessage("summaryAction"),
+                request.title || chrome.i18n.getMessage("defaultPage"),
+                error.message
+            ])
         });
     }
 }

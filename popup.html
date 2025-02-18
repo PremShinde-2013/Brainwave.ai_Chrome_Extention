@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Blinko拓展</title>
+    <title>__MSG_popupTitle__</title>
     <meta charset="UTF-8">
     <style>
         body {
@@ -410,52 +410,52 @@
 <body>
     <img src="images/banner.png" alt="Banner" class="banner">
     <div class="tab">
-        <button class="tablinks active" data-tab="common">常用</button>
-        <button class="tablinks" data-tab="quicknote">快捷记录</button>
-        <button class="tablinks" data-tab="settings">设置</button>
+        <button class="tablinks active" data-tab="common">__MSG_tabCommon__</button>
+        <button class="tablinks" data-tab="quicknote">__MSG_tabQuickNote__</button>
+        <button class="tablinks" data-tab="settings">__MSG_tabSettings__</button>
     </div>
 
     <div id="status"></div>
 
     <div id="common" class="tabcontent" style="display: block;">
         <div class="function-section">
-            <div class="function-title">网页总结</div>
-            <button id="extract" class="extract-button">提取并总结页面内容</button>
+            <div class="function-title">__MSG_webSummaryTitle__</div>
+            <button id="extract" class="extract-button">__MSG_extractAndSummarizeButton__</button>
         </div>
 
         <div class="function-section">
-            <div class="function-title">提取网页正文</div>
-            <button id="extractContent" class="extract-button">提取网页正文</button>
+            <div class="function-title">__MSG_extractContentTitle__</div>
+            <button id="extractContent" class="extract-button">__MSG_extractContentButton__</button>
         </div>
         
         <div id="summaryPreview">
-            <h3>总结预览</h3>
-            <textarea id="summaryText" class="text-input" placeholder="总结内容将显示在这里..."></textarea>
+            <h3>__MSG_summaryPreviewTitle__</h3>
+            <textarea id="summaryText" class="text-input" placeholder="__MSG_summaryTextPlaceholder__"></textarea>
             <div class="url-display">
                 <div id="pageTitle"></div>
                 <div id="pageUrl"></div>
             </div>
             <div class="preview-actions">
-                <button id="cancelEdit" class="clear-button">取消</button>
-                <button id="editSummary" class="send-button">修改并保存</button>
+                <button id="cancelEdit" class="clear-button">__MSG_cancelButton__</button>
+                <button id="editSummary" class="send-button">__MSG_editAndSaveButton__</button>
             </div>
         </div>
     </div>
 
     <div id="quicknote" class="tabcontent">
         <div class="function-section">
-            <div class="function-title">快捷记录</div>
-            <textarea id="quickNoteInput" class="text-input" placeholder="在此输入笔记内容，或通过右键菜单收集网页内容..."></textarea>
+            <div class="function-title">__MSG_quickNoteTitle__</div>
+            <textarea id="quickNoteInput" class="text-input" placeholder="__MSG_quickNotePlaceholder__"></textarea>
             <div id="attachmentList" class="attachment-list">
                 <div class="attachment-header">
-                    <span class="attachment-title">附件列表</span>
-                    <button id="clearAttachments" class="clear-button" style="display: none;">清除所有</button>
+                    <span class="attachment-title">__MSG_attachmentListTitle__</span>
+                    <button id="clearAttachments" class="clear-button" style="display: none;">__MSG_clearAllButton__</button>
                 </div>
                 <div id="attachmentItems" class="attachment-items"></div>
             </div>
             <div class="button-group">
-                <button id="sendQuickNote" class="send-button">发送</button>
-                <button id="clearQuickNote" class="clear-button">清除</button>
+                <button id="sendQuickNote" class="send-button">__MSG_sendButton__</button>
+                <button id="clearQuickNote" class="clear-button">__MSG_clearButton__</button>
             </div>
         </div>
     </div>
