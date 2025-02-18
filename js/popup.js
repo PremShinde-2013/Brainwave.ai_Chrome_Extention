@@ -92,10 +92,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         // 绑定提取网页正文按钮事件
         document.getElementById('extractContent').addEventListener('click', async () => {
             try {
-                showStatus('正在提取网页内容...', 'loading');
+                showStatus(chrome.i18n.getMessage('extractingContent'), 'loading');
                 const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
                 if (!tab) {
-                    throw new Error('无法获取当前标签页');
+                    throw new Error(chrome.i18n.getMessage('cannotGetTab'));
                 }
 
                 // 发送消息到content script获取内容
@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             } catch (error) {
                 console.error('提取网页内容失败:', error);
-                showStatus('提取失败: ' + error.message, 'error');
+                showStatus(chrome.i18n.getMessage('settingsSaveError', [error.message]), 'error');
             }
         });
 
@@ -126,20 +126,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('saveSettings').addEventListener('click', async () => {
             try {
                 await saveSettings();
-                showStatus('设置已保存', 'success');
+                showStatus(chrome.i18n.getMessage('settingsSaved'), 'success');
                 setTimeout(hideStatus, 2000);
             } catch (error) {
-                showStatus('保存设置失败: ' + error.message, 'error');
+                showStatus(chrome.i18n.getMessage('settingsSaveError', [error.message]), 'error');
             }
         });
 
         document.getElementById('resetSettings').addEventListener('click', async () => {
             try {
                 await resetSettings();
-                showStatus('设置已重置为默认值', 'success');
+                showStatus(chrome.i18n.getMessage('settingsReset'), 'success');
                 setTimeout(hideStatus, 2000);
             } catch (error) {
-                showStatus('重置设置失败: ' + error.message, 'error');
+                showStatus(chrome.i18n.getMessage('settingsResetError', [error.message]), 'error');
             }
         });
 
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     } catch (error) {
         console.error('初始化失败:', error);
-        showStatus('初始化失败: ' + error.message, 'error');
+        showStatus(chrome.i18n.getMessage('initializationError', [error.message]), 'error');
     }
 });
 

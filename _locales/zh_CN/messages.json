@@ -146,5 +146,157 @@
   "editAndSaveButton": {
     "message": "修改并保存",
     "description": "修改并保存按钮文本"
+  },
+  "settingsTitle": {
+    "message": "设置",
+    "description": "设置页面标题"
+  },
+  "blinkoApiUrlLabel": {
+    "message": "Blinko API URL:",
+    "description": "Blinko API URL 输入框标签"
+  },
+  "blinkoApiUrlHelp": {
+    "message": "填写到/v1即可，无需填写完整路径",
+    "description": "API URL 输入框帮助文本"
+  },
+  "blinkoAuthKeyLabel": {
+    "message": "Blinko认证密钥:",
+    "description": "Blinko认证密钥输入框标签"
+  },
+  "fetchAiConfigButton": {
+    "message": "从Blinko获取AI配置",
+    "description": "获取AI配置按钮文本"
+  },
+  "openaiApiUrlLabel": {
+    "message": "OpenAI兼容接口地址:",
+    "description": "OpenAI API URL 输入框标签"
+  },
+  "apiKeyLabel": {
+    "message": "API密钥:",
+    "description": "API密钥输入框标签"
+  },
+  "modelNameLabel": {
+    "message": "模型名称:",
+    "description": "模型名称输入框标签"
+  },
+  "temperatureLabel": {
+    "message": "温度:",
+    "description": "温度输入框标签"
+  },
+  "promptTemplateLabel": {
+    "message": "提示词模板:",
+    "description": "提示词模板输入框标签"
+  },
+  "promptTemplatePlaceholder": {
+    "message": "请用简洁的语言总结以下内容，突出重点：{content}",
+    "description": "提示词模板输入框占位文本"
+  },
+  "includeSummaryUrlLabel": {
+    "message": "总结笔记包含URL",
+    "description": "总结包含URL复选框标签"
+  },
+  "includeSummaryUrlHelp": {
+    "message": "网页总结时是否包含原文链接",
+    "description": "总结包含URL帮助文本"
+  },
+  "includeSelectionUrlLabel": {
+    "message": "划词保存时包含网页链接",
+    "description": "划词包含URL复选框标签"
+  },
+  "includeImageUrlLabel": {
+    "message": "图片保存时包含网页链接",
+    "description": "图片包含URL复选框标签"
+  },
+  "includeQuickNoteUrlLabel": {
+    "message": "快捷记录包含网页链接",
+    "description": "快捷记录包含URL复选框标签"
+  },
+  "summaryTagLabel": {
+    "message": "总结标签：",
+    "description": "总结标签输入框标签"
+  },
+  "selectionTagLabel": {
+    "message": "划词标签：",
+    "description": "划词标签输入框标签"
+  },
+  "imageTagLabel": {
+    "message": "图片标签：",
+    "description": "图片标签输入框标签"
+  },
+  "enableFloatingBallLabel": {
+    "message": "启用悬浮球",
+    "description": "启用悬浮球复选框标签"
+  },
+  "jinaApiKeyLabel": {
+    "message": "Jina Reader API Key:",
+    "description": "Jina Reader API密钥输入框标签"
+  },
+  "useJinaApiKeyLabel": {
+    "message": "使用API Key加速提取",
+    "description": "使用Jina API密钥复选框标签"
+  },
+  "saveWebImagesLabel": {
+    "message": "保存网页图片链接(部分图片会被平台拦截,请谨慎开启)",
+    "description": "保存网页图片复选框标签"
+  },
+  "extractTagLabel": {
+    "message": "网页剪藏标签：",
+    "description": "网页剪藏标签输入框标签"
+  },
+  "saveSettingsButton": {
+    "message": "保存设置",
+    "description": "保存设置按钮文本"
+  },
+  "resetSettingsButton": {
+    "message": "重置默认值",
+    "description": "重置设置按钮文本"
+  },
+  "showHideButton": {
+    "message": "显示/隐藏",
+    "description": "显示/隐藏密码按钮文本"
+  },
+  "extractingContent": {
+    "message": "正在提取网页内容...",
+    "description": "提取内容时的状态消息"
+  },
+  "cannotGetTab": {
+    "message": "无法获取当前标签页",
+    "description": "无法获取当前标签页时的错误消息"
+  },
+  "settingsSaved": {
+    "message": "设置已保存",
+    "description": "设置保存成功时的消息"
+  },
+  "settingsSaveError": {
+    "message": "保存设置失败: %s",
+    "description": "设置保存失败时的错误消息"
+  },
+  "settingsReset": {
+    "message": "设置已重置为默认值",
+    "description": "设置重置成功时的消息"
+  },
+  "settingsResetError": {
+    "message": "重置设置失败: %s",
+    "description": "设置重置失败时的错误消息"
+  },
+  "initializationError": {
+    "message": "初始化失败: %s",
+    "description": "初始化失败时的错误消息"
+  },
+  "summaryTagPlaceholder": {
+    "message": "#网页/总结",
+    "description": "总结标签输入框占位符"
+  },
+  "selectionTagPlaceholder": {
+    "message": "#网页/摘录",
+    "description": "划词标签输入框占位符"
+  },
+  "imageTagPlaceholder": {
+    "message": "#网页/图片",
+    "description": "图片标签输入框占位符"
+  },
+  "extractTagPlaceholder": {
+    "message": "#网页/剪藏",
+    "description": "网页剪藏标签输入框占位符"
   }
 } 

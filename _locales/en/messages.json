@@ -158,5 +158,157 @@
   "editAndSaveButton": {
     "message": "Edit and Save",
     "description": "Button text for edit and save action"
+  },
+  "settingsTitle": {
+    "message": "Settings",
+    "description": "Settings page title"
+  },
+  "blinkoApiUrlLabel": {
+    "message": "Blinko API URL:",
+    "description": "Label for Blinko API URL input"
+  },
+  "blinkoApiUrlHelp": {
+    "message": "Fill in up to /v1, no need for the complete path",
+    "description": "Help text for API URL input"
+  },
+  "blinkoAuthKeyLabel": {
+    "message": "Blinko Auth Key:",
+    "description": "Label for Blinko auth key input"
+  },
+  "fetchAiConfigButton": {
+    "message": "Get AI Config from Blinko",
+    "description": "Button text for fetching AI configuration"
+  },
+  "openaiApiUrlLabel": {
+    "message": "OpenAI Compatible API URL:",
+    "description": "Label for OpenAI API URL input"
+  },
+  "apiKeyLabel": {
+    "message": "API Key:",
+    "description": "Label for API key input"
+  },
+  "modelNameLabel": {
+    "message": "Model Name:",
+    "description": "Label for model name input"
+  },
+  "temperatureLabel": {
+    "message": "Temperature:",
+    "description": "Label for temperature input"
+  },
+  "promptTemplateLabel": {
+    "message": "Prompt Template:",
+    "description": "Label for prompt template input"
+  },
+  "promptTemplatePlaceholder": {
+    "message": "Please summarize the following content in concise language, highlighting the key points: {content}",
+    "description": "Placeholder for prompt template input"
+  },
+  "includeSummaryUrlLabel": {
+    "message": "Include URL in summary notes",
+    "description": "Label for include URL in summary checkbox"
+  },
+  "includeSummaryUrlHelp": {
+    "message": "Whether to include the original URL when summarizing web pages",
+    "description": "Help text for include URL in summary"
+  },
+  "includeSelectionUrlLabel": {
+    "message": "Include URL when saving selected text",
+    "description": "Label for include URL in selection checkbox"
+  },
+  "includeImageUrlLabel": {
+    "message": "Include URL when saving images",
+    "description": "Label for include URL in image checkbox"
+  },
+  "includeQuickNoteUrlLabel": {
+    "message": "Include URL in quick notes",
+    "description": "Label for include URL in quick note checkbox"
+  },
+  "summaryTagLabel": {
+    "message": "Summary Tag:",
+    "description": "Label for summary tag input"
+  },
+  "selectionTagLabel": {
+    "message": "Selection Tag:",
+    "description": "Label for selection tag input"
+  },
+  "imageTagLabel": {
+    "message": "Image Tag:",
+    "description": "Label for image tag input"
+  },
+  "enableFloatingBallLabel": {
+    "message": "Enable Floating Ball",
+    "description": "Label for enable floating ball checkbox"
+  },
+  "jinaApiKeyLabel": {
+    "message": "Jina Reader API Key:",
+    "description": "Label for Jina Reader API key input"
+  },
+  "useJinaApiKeyLabel": {
+    "message": "Use API Key to accelerate extraction",
+    "description": "Label for use Jina API key checkbox"
+  },
+  "saveWebImagesLabel": {
+    "message": "Save web image links (some images may be blocked by platforms, please use with caution)",
+    "description": "Label for save web images checkbox"
+  },
+  "extractTagLabel": {
+    "message": "Web Clipping Tag:",
+    "description": "Label for extract tag input"
+  },
+  "saveSettingsButton": {
+    "message": "Save Settings",
+    "description": "Button text for save settings"
+  },
+  "resetSettingsButton": {
+    "message": "Reset to Default",
+    "description": "Button text for reset settings"
+  },
+  "showHideButton": {
+    "message": "Show/Hide",
+    "description": "Button text for show/hide password"
+  },
+  "extractingContent": {
+    "message": "Extracting web content...",
+    "description": "Status message when extracting content"
+  },
+  "cannotGetTab": {
+    "message": "Cannot get current tab",
+    "description": "Error message when unable to get current tab"
+  },
+  "settingsSaved": {
+    "message": "Settings saved",
+    "description": "Success message when settings are saved"
+  },
+  "settingsSaveError": {
+    "message": "Failed to save settings: %s",
+    "description": "Error message when saving settings fails"
+  },
+  "settingsReset": {
+    "message": "Settings reset to default",
+    "description": "Success message when settings are reset"
+  },
+  "settingsResetError": {
+    "message": "Failed to reset settings: %s",
+    "description": "Error message when resetting settings fails"
+  },
+  "initializationError": {
+    "message": "Initialization failed: %s",
+    "description": "Error message when initialization fails"
+  },
+  "summaryTagPlaceholder": {
+    "message": "#web/summary",
+    "description": "Placeholder for summary tag input"
+  },
+  "selectionTagPlaceholder": {
+    "message": "#web/selection",
+    "description": "Placeholder for selection tag input"
+  },
+  "imageTagPlaceholder": {
+    "message": "#web/image",
+    "description": "Placeholder for image tag input"
+  },
+  "extractTagPlaceholder": {
+    "message": "#web/clipping",
+    "description": "Placeholder for extract tag input"
   }
 } 

@@ -461,132 +461,132 @@
     </div>
 
     <div id="settings" class="tabcontent">
-        <h2>设置</h2>
+        <h2>__MSG_settingsTitle__</h2>
         <div class="setting-group">
-            <label>Blinko API URL:</label>
+            <label>__MSG_blinkoApiUrlLabel__</label>
             <input type="text" id="targetUrl" placeholder="https://your-domain/api/v1">
-            <div class="help-text">填写到/v1即可，无需填写完整路径</div>
+            <div class="help-text">__MSG_blinkoApiUrlHelp__</div>
         </div>
         
         <div class="setting-group">
-            <label>Blinko认证密钥:</label>
+            <label>__MSG_blinkoAuthKeyLabel__</label>
             <div class="input-container">
                 <input type="text" id="authKey" class="sensitive-input text-input" placeholder="your-auth-key">
-                <button class="toggle-visibility" title="显示/隐藏">👁️</button>
+                <button class="toggle-visibility" title="__MSG_showHideButton__">👁️</button>
             </div>
-            <button id="fetchAiConfig" class="fetch-button">从Blinko获取AI配置</button>
+            <button id="fetchAiConfig" class="fetch-button">__MSG_fetchAiConfigButton__</button>
         </div>
 
         <div class="setting-group">
-            <label>OpenAI兼容接口地址:</label>
+            <label>__MSG_openaiApiUrlLabel__</label>
             <input type="text" id="modelUrl" placeholder="https://api.openai.com/v1">
-            <div class="help-text">填写到/v1即可，无需填写完整路径</div>
+            <div class="help-text">__MSG_blinkoApiUrlHelp__</div>
         </div>
         
         <div class="setting-group">
-            <label>API密钥:</label>
+            <label>__MSG_apiKeyLabel__</label>
             <div class="input-container">
                 <input type="text" id="apiKey" class="sensitive-input text-input" placeholder="sk-...">
-                <button class="toggle-visibility" title="显示/隐藏">👁️</button>
+                <button class="toggle-visibility" title="__MSG_showHideButton__">👁️</button>
             </div>
         </div>
 
         <div class="setting-group">
-            <label>模型名称:</label>
+            <label>__MSG_modelNameLabel__</label>
             <input type="text" id="modelName" placeholder="gpt-3.5-turbo">
         </div>
 
         <div class="setting-group">
-            <label>温度:</label>
+            <label>__MSG_temperatureLabel__</label>
             <input type="number" id="temperature" min="0" max="1" step="0.1" value="0.7">
         </div>
 
         <div class="setting-group">
-            <label>提示词模板:</label>
-            <textarea id="promptTemplate" class="text-input" placeholder="请用简洁的语言总结以下内容，突出重点：{content}"></textarea>
+            <label>__MSG_promptTemplateLabel__</label>
+            <textarea id="promptTemplate" class="text-input" placeholder="__MSG_promptTemplatePlaceholder__"></textarea>
         </div>
 
         <div class="setting-group">
-            <label>
+            <label for="includeSummaryUrl">
                 <input type="checkbox" id="includeSummaryUrl">
-                总结笔记包含URL
+                <span>__MSG_includeSummaryUrlLabel__</span>
             </label>
-            <div class="help-text">网页总结时是否包含原文链接</div>
+            <div class="help-text">__MSG_includeSummaryUrlHelp__</div>
         </div>
 
         <div class="setting-group">
-            <label>
+            <label for="includeSelectionUrl">
                 <input type="checkbox" id="includeSelectionUrl">
-                划词保存时包含网页链接
+                <span>__MSG_includeSelectionUrlLabel__</span>
             </label>
         </div>
 
         <div class="setting-group">
-            <label>
+            <label for="includeImageUrl">
                 <input type="checkbox" id="includeImageUrl">
-                图片保存时包含网页链接
+                <span>__MSG_includeImageUrlLabel__</span>
             </label>
         </div>
 
         <div class="setting-group">
-            <label>
+            <label for="includeQuickNoteUrl">
                 <input type="checkbox" id="includeQuickNoteUrl">
-                快捷记录包含网页链接
+                <span>__MSG_includeQuickNoteUrlLabel__</span>
             </label>
         </div>
 
         <div class="setting-group">
-            <label>总结标签：</label>
-            <input type="text" id="summaryTag" placeholder="#网页/总结">
+            <label>__MSG_summaryTagLabel__</label>
+            <input type="text" id="summaryTag" placeholder="__MSG_summaryTagPlaceholder__">
         </div>
 
         <div class="setting-group">
-            <label>划词标签：</label>
-            <input type="text" id="selectionTag" placeholder="#网页/摘录">
+            <label>__MSG_selectionTagLabel__</label>
+            <input type="text" id="selectionTag" placeholder="__MSG_selectionTagPlaceholder__">
         </div>
 
         <div class="setting-group">
-            <label>图片标签：</label>
-            <input type="text" id="imageTag" placeholder="#网页/图片">
+            <label>__MSG_imageTagLabel__</label>
+            <input type="text" id="imageTag" placeholder="__MSG_imageTagPlaceholder__">
         </div>
 
         <div class="setting-group">
-            <label>
+            <label for="enableFloatingBall">
                 <input type="checkbox" id="enableFloatingBall">
-                启用悬浮球
+                <span>__MSG_enableFloatingBallLabel__</span>
             </label>
         </div>
 
         <div class="setting-group">
-            <label>Jina Reader API Key:</label>
+            <label>__MSG_jinaApiKeyLabel__</label>
             <div class="input-container">
                 <input type="text" id="jinaApiKey" class="sensitive-input text-input" placeholder="your-jina-api-key">
-                <button class="toggle-visibility" title="显示/隐藏">👁️</button>
+                <button class="toggle-visibility" title="__MSG_showHideButton__">👁️</button>
             </div>
         </div>
 
         <div class="setting-group">
-            <label>
+            <label for="useJinaApiKey">
                 <input type="checkbox" id="useJinaApiKey">
-                使用API Key加速提取
+                <span>__MSG_useJinaApiKeyLabel__</span>
             </label>
         </div>
 
         <div class="setting-group">
-            <label>
+            <label for="saveWebImages">
                 <input type="checkbox" id="saveWebImages">
-                保存网页图片链接(部分图片会被平台拦截,请谨慎开启)
+                <span>__MSG_saveWebImagesLabel__</span>
             </label>
         </div>
 
         <div class="setting-group">
-            <label>网页剪藏标签：</label>
-            <input type="text" id="extractTag" placeholder="#网页/剪藏">
+            <label>__MSG_extractTagLabel__</label>
+            <input type="text" id="extractTag" placeholder="__MSG_extractTagPlaceholder__">
         </div>
 
         <div class="settings-actions">
-            <button id="saveSettings">保存设置</button>
-            <button id="resetSettings" class="secondary">重置默认值</button>
+            <button id="saveSettings">__MSG_saveSettingsButton__</button>
+            <button id="resetSettings" class="secondary">__MSG_resetSettingsButton__</button>
         </div>
     </div>
 
