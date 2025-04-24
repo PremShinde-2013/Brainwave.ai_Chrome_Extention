@@ -1,4 +1,4 @@
-// 显示状态信息
+/// Display status message
 function showStatus(message, type = 'loading') {
     const statusDiv = document.getElementById('status');
     if (statusDiv) {
@@ -8,7 +8,7 @@ function showStatus(message, type = 'loading') {
     }
 }
 
-// 隐藏状态信息
+// Hide status message
 function hideStatus() {
     const statusDiv = document.getElementById('status');
     if (statusDiv) {
@@ -16,29 +16,29 @@ function hideStatus() {
     }
 }
 
-// 显示成功图标
+// Show success icon
 async function showSuccessIcon() {
     try {
         await chrome.action.setIcon({
             path: chrome.runtime.getURL("images/icon128_success.png")
         });
 
-        // 3秒后恢复原始图标
+        // Restore original icon after 3 seconds
         setTimeout(async () => {
             try {
                 await chrome.action.setIcon({
                     path: chrome.runtime.getURL("images/icon128.png")
                 });
             } catch (error) {
-                console.error('恢复图标失败:', error);
+                console.error('Failed to restore icon:', error);
             }
         }, 3000);
     } catch (error) {
-        console.error('设置成功图标失败:', error);
+        console.error('Failed to set success icon:', error);
     }
 }
 
-// 清空总结预览内容
+// Clear summary preview content
 function clearSummaryPreview() {
     const summaryPreview = document.getElementById('summaryPreview');
     const summaryText = document.getElementById('summaryText');
@@ -59,7 +59,7 @@ function clearSummaryPreview() {
     }
 }
 
-// 显示总结预览
+// Show summary preview
 async function showSummaryPreview(tempData) {
     if (tempData && tempData.summary) {
         document.getElementById('summaryPreview').style.display = 'block';
@@ -73,36 +73,36 @@ async function showSummaryPreview(tempData) {
     }
 }
 
-// 初始化UI事件监听器
+// Initialize UI event listeners
 function initializeUIListeners() {
-    // 标签页切换
+    // Tab switching
     document.querySelectorAll('.tablinks').forEach(button => {
         button.addEventListener('click', (e) => {
             const tabName = e.target.getAttribute('data-tab');
-            
-            // 先隐藏所有标签页内容
+
+            // Hide all tab contents first
             document.querySelectorAll('.tabcontent').forEach(content => {
                 content.style.display = 'none';
             });
-            
-            // 移除所有标签的激活状态
+
+            // Remove active class from all tab buttons
             document.querySelectorAll('.tablinks').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
-            // 显示选中的标签页并激活对应的标签
+
+            // Show the selected tab content and activate the corresponding tab
             document.getElementById(tabName).style.display = 'block';
             e.target.classList.add('active');
         });
     });
 
-    // 密钥显示/隐藏
+    // Toggle secret key visibility
     document.querySelectorAll('.toggle-visibility').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const input = this.previousElementSibling;
             if (input) {
                 input.classList.toggle('visible');
-                // 更新按钮图标
+                // Update button icon
                 this.textContent = input.classList.contains('visible') ? '🔒' : '👁️';
             }
         });
@@ -116,4 +116,4 @@ export {
     clearSummaryPreview,
     showSummaryPreview,
     initializeUIListeners
-}; 
+};

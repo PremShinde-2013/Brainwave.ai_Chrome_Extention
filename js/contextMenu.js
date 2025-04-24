@@ -2,17 +2,17 @@ import { sendToBlinko, uploadFile } from './api.js';
 import { showSuccessIcon } from './ui.js';
 import { handleContentRequest } from './messageHandler.js';
 
-// 初始化右键菜单
+// Initialize right-click context menu
 function initializeContextMenu() {
     chrome.runtime.onInstalled.addListener(() => {
-        // 创建父级菜单
+        // Create parent menu
         chrome.contextMenus.create({
             id: "blinkoExtension",
             title: chrome.i18n.getMessage("extensionName"),
             contexts: ["all"]
         });
 
-        // 创建选中文本菜单
+        // Create menu for selected text
         chrome.contextMenus.create({
             id: "sendSelectedText",
             title: chrome.i18n.getMessage("sendSelectedText"),
@@ -20,7 +20,7 @@ function initializeContextMenu() {
             parentId: "blinkoExtension"
         });
 
-        // 添加预存到快捷记录菜单（文本）
+        // Add "save to quick note" menu (text)
         chrome.contextMenus.create({
             id: "saveToQuickNote",
             title: chrome.i18n.getMessage("saveToQuickNote"),
@@ -28,7 +28,7 @@ function initializeContextMenu() {
             parentId: "blinkoExtension"
         });
 
-        // 添加预存到快捷记录菜单（图片）
+        // Add "save to quick note" menu (image)
         chrome.contextMenus.create({
             id: "saveImageToQuickNote",
             title: chrome.i18n.getMessage("saveImageToQuickNote"),
@@ -36,7 +36,7 @@ function initializeContextMenu() {
             parentId: "blinkoExtension"
         });
 
-        // 创建图片右键菜单
+        // Create image right-click menu
         chrome.contextMenus.create({
             id: 'saveImageToBlinko',
             title: chrome.i18n.getMessage("saveImageToBlinko"),
@@ -44,7 +44,7 @@ function initializeContextMenu() {
             parentId: "blinkoExtension"
         });
 
-        // 创建总结网页内容菜单
+        // Create menu to summarize page content
         chrome.contextMenus.create({
             id: 'summarizePageContent',
             title: chrome.i18n.getMessage("summarizePageContent"),
@@ -52,7 +52,7 @@ function initializeContextMenu() {
             parentId: "blinkoExtension"
         });
 
-        // 创建提取网页内容菜单
+        // Create menu to extract page content
         chrome.contextMenus.create({
             id: 'extractPageContent',
             title: chrome.i18n.getMessage("extractPageContent"),
@@ -62,46 +62,46 @@ function initializeContextMenu() {
     });
 }
 
-// 处理右键菜单点击
+// Handle context menu click actions
 async function handleContextMenuClick(info, tab) {
     if (info.menuItemId === "sendSelectedText") {
         try {
             const result = await chrome.storage.sync.get('settings');
             const settings = result.settings;
-            
+
             if (!settings) {
-                throw new Error('未找到设置信息');
+                throw new Error('Settings not found');
             }
 
-            // 准备内容
+            // Prepare content
             let content = info.selectionText.trim();
 
-            // 发送到Blinko
+            // Send to Blinko
             const response = await sendToBlinko(
                 content,
                 tab.url,
                 tab.title,
                 null,
-                'extract'  // 划词保存使用extract类型
+                'extract'  // Use "extract" type for selected text
             );
-            
+
             if (response.success) {
                 showSuccessIcon();
                 chrome.notifications.create({
                     type: 'basic',
                     iconUrl: 'images/icon128.png',
-                    title: '发送成功',
-                    message: '已成功发送选中文本到Blinko'
+                    title: 'Sent Successfully',
+                    message: 'Selected text has been sent to Blinko'
                 });
             } else {
-                throw new Error(response.error || '发送选中文本失败');
+                throw new Error(response.error || 'Failed to send selected text');
             }
         } catch (error) {
-            console.error('发送选中文本失败:', error);
+            console.error('Failed to send selected text:', error);
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'images/icon128.png',
-                title: '发送失败',
+                title: 'Send Failed',
                 message: error.message
             });
         }
@@ -109,32 +109,32 @@ async function handleContextMenuClick(info, tab) {
 
     if (info.menuItemId === "saveToQuickNote") {
         try {
-            // 获取当前快捷记录内容
+            // Get current quick note content
             const result = await chrome.storage.local.get('quickNote');
             let currentContent = result.quickNote || '';
-            
-            // 添加新的选中内容
+
+            // Add new selected content
             if (currentContent) {
-                currentContent += '\n\n'; // 如果已有内容，添加两个换行符
+                currentContent += '\n\n'; // Add two line breaks if content exists
             }
             currentContent += info.selectionText.trim();
-            
-            // 保存更新后的内容
+
+            // Save updated content
             await chrome.storage.local.set({ 'quickNote': currentContent });
-            
-            // 显示成功通知
+
+            // Show success notification
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'images/icon128.png',
-                title: '已添加到快捷记录',
-                message: '选中的文本已添加到快捷记录中'
+                title: 'Added to Quick Note',
+                message: 'Selected text has been added to Quick Note'
             });
         } catch (error) {
-            console.error('保存到快捷记录失败:', error);
+            console.error('Failed to save to Quick Note:', error);
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'images/icon128.png',
-                title: '保存失败',
+                title: 'Save Failed',
                 message: error.message
             });
         }
@@ -142,48 +142,48 @@ async function handleContextMenuClick(info, tab) {
 
     if (info.menuItemId === "saveImageToQuickNote") {
         try {
-            // 获取设置
+            // Get settings
             const result = await chrome.storage.sync.get('settings');
             const settings = result.settings;
-            
+
             if (!settings) {
-                throw new Error('未找到设置信息');
+                throw new Error('Settings not found');
             }
 
-            // 获取图片文件
+            // Fetch image file
             const imageResponse = await fetch(info.srcUrl);
             const blob = await imageResponse.blob();
             const file = new File([blob], 'image.png', { type: blob.type });
-            
-            // 上传图片文件
+
+            // Upload image file
             const imageAttachment = await uploadFile(file, settings);
 
-            // 获取当前快捷记录的附件列表
+            // Get current list of attachments
             const quickNoteResult = await chrome.storage.local.get(['quickNoteAttachments']);
             let attachments = quickNoteResult.quickNoteAttachments || [];
 
-            // 添加新的附件，只保存原始URL
+            // Add new attachment (save original URL)
             attachments.push({
                 ...imageAttachment,
-                originalUrl: info.srcUrl // 保存原始URL以便在popup中创建本地URL
+                originalUrl: info.srcUrl // Store original URL for popup local preview
             });
 
-            // 保存更新后的附件列表
+            // Save updated attachment list
             await chrome.storage.local.set({ 'quickNoteAttachments': attachments });
-            
-            // 显示成功通知
+
+            // Show success notification
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'images/icon128.png',
-                title: '已添加到快捷记录',
-                message: '图片已添加到快捷记录中'
+                title: 'Added to Quick Note',
+                message: 'Image has been added to Quick Note'
             });
         } catch (error) {
-            console.error('保存图片到快捷记录失败:', error);
+            console.error('Failed to save image to Quick Note:', error);
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'images/icon128.png',
-                title: '保存失败',
+                title: 'Save Failed',
                 message: error.message
             });
         }
@@ -191,76 +191,76 @@ async function handleContextMenuClick(info, tab) {
 
     if (info.menuItemId === 'saveImageToBlinko') {
         try {
-            // 获取设置
+            // Get settings
             const result = await chrome.storage.sync.get('settings');
             const settings = result.settings;
-            
+
             if (!settings) {
-                throw new Error('未找到设置信息');
+                throw new Error('Settings not found');
             }
 
-            // 获取图片文件
+            // Fetch image file
             const imageResponse = await fetch(info.srcUrl);
             const blob = await imageResponse.blob();
             const file = new File([blob], 'image.png', { type: blob.type });
-            
-            // 上传图片文件
+
+            // Upload image file
             const imageAttachment = await uploadFile(file, settings);
 
-            // 发送到Blinko，包含图片附件
+            // Send to Blinko with image attachment
             const response = await sendToBlinko('', tab.url, tab.title, imageAttachment, 'image');
-            
+
             if (response.success) {
-                // 通知用户保存成功
+                // Notify user of success
                 showSuccessIcon();
                 chrome.notifications.create({
                     type: 'basic',
                     iconUrl: 'images/icon128.png',
-                    title: '保存成功',
-                    message: '已成功保存图片到Blinko'
+                    title: 'Saved Successfully',
+                    message: 'Image has been saved to Blinko'
                 });
             } else {
-                throw new Error(response.error || '保存失败');
+                throw new Error(response.error || 'Save failed');
             }
         } catch (error) {
-            console.error('保存图片失败:', error);
+            console.error('Failed to save image:', error);
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'images/icon128.png',
-                title: '保存失败',
+                title: 'Save Failed',
                 message: error.message
             });
         }
     }
 
-    // 处理总结和提取网页内容
+    // Handle summarize and extract page content
     if (info.menuItemId === 'summarizePageContent' || info.menuItemId === 'extractPageContent') {
         try {
-            // 获取页面内容
+            // Get page content
             const response = await chrome.tabs.sendMessage(tab.id, {
                 action: 'getContent'
             });
 
             if (!response || !response.success) {
-                throw new Error(response.error || '获取内容失败');
+                throw new Error(response.error || 'Failed to get content');
             }
 
-            // 直接处理并保存内容
+            // Process and save content directly
             await handleContentRequest({
                 content: response.content,
                 url: response.url,
                 title: response.title,
                 isExtractOnly: info.menuItemId === 'extractPageContent',
-                directSave: true  // 标记为直接保存
+                directSave: true  // Mark as direct save
             });
 
-            // 成功通知会在handleContentRequest中处理
+            // Success notification handled in handleContentRequest
         } catch (error) {
-            console.error('处理网页内容失败:', error);
+            console.error('Failed to handle page content:', error);
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'images/icon128.png',
-                title: info.menuItemId === 'summarizePageContent' ? '总结失败' : '提取失败',
+                title: info.menuItemId === 'summarizePageContent' ? 'Summarization Failed' : 'Extraction Failed',
                 message: error.message
             });
         }

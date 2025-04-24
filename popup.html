@@ -408,188 +408,190 @@
     </style>
 </head>
 <body>
-    <img src="images/banner.png" alt="Banner" class="banner">
+    <!-- <img src="images/banner.png" alt="Banner" class="banner"> -->
+    <p alt="Banner" class="banner" style="font-weight: bold; justify-content: center; justify-items: center; display: flex; color: purple; font-size: 25px; ">Brainwave.ai </p>
     <div class="tab">
-        <button class="tablinks active" data-tab="common">__MSG_tabCommon__</button>
-        <button class="tablinks" data-tab="quicknote">__MSG_tabQuickNote__</button>
-        <button class="tablinks" data-tab="settings">__MSG_tabSettings__</button>
+        <button class="tablinks active" data-tab="common">Common</button>
+        <button class="tablinks" data-tab="quicknote">Quick Note</button>
+        <button class="tablinks" data-tab="settings">Settings</button>
     </div>
 
     <div id="status"></div>
 
     <div id="common" class="tabcontent" style="display: block;">
         <div class="function-section">
-            <div class="function-title">__MSG_webSummaryTitle__</div>
-            <button id="extract" class="extract-button">__MSG_extractAndSummarizeButton__</button>
+            <div class="function-title">Web Summary</div>
+            <button id="extract" class="extract-button">Extract and Summarize</button>
         </div>
 
         <div class="function-section">
-            <div class="function-title">__MSG_extractContentTitle__</div>
-            <button id="extractContent" class="extract-button">__MSG_extractContentButton__</button>
+            <div class="function-title">Extract Content</div>
+            <button id="extractContent" class="extract-button">Extract Content</button>
         </div>
         
         <div id="summaryPreview">
-            <h3>__MSG_summaryPreviewTitle__</h3>
-            <textarea id="summaryText" class="text-input" placeholder="__MSG_summaryTextPlaceholder__"></textarea>
+            <h3>Summary Preview</h3>
+            <textarea id="summaryText" class="text-input" placeholder="Enter your summary here"></textarea>
             <div class="url-display">
                 <div id="pageTitle"></div>
                 <div id="pageUrl"></div>
             </div>
             <div class="preview-actions">
-                <button id="cancelEdit" class="clear-button">__MSG_cancelButton__</button>
-                <button id="editSummary" class="send-button">__MSG_editAndSaveButton__</button>
+                <button id="cancelEdit" class="clear-button">Cancel</button>
+                <button id="editSummary" class="send-button">Edit and Save</button>
             </div>
         </div>
     </div>
 
     <div id="quicknote" class="tabcontent">
         <div class="function-section">
-            <div class="function-title">__MSG_quickNoteTitle__</div>
-            <textarea id="quickNoteInput" class="text-input" placeholder="__MSG_quickNotePlaceholder__"></textarea>
+            <div class="function-title">Quick Note</div>
+            <textarea id="quickNoteInput" class="text-input" placeholder="Write your quick note here"></textarea>
             <div id="attachmentList" class="attachment-list">
                 <div class="attachment-header">
-                    <span class="attachment-title">__MSG_attachmentListTitle__</span>
-                    <button id="clearAttachments" class="clear-button" style="display: none;">__MSG_clearAllButton__</button>
+                    <span class="attachment-title">Attachment List</span>
+                    <button id="clearAttachments" class="clear-button" style="display: none;">Clear All</button>
                 </div>
                 <div id="attachmentItems" class="attachment-items"></div>
             </div>
             <div class="button-group">
-                <button id="sendQuickNote" class="send-button">__MSG_sendButton__</button>
-                <button id="clearQuickNote" class="clear-button">__MSG_clearButton__</button>
+                <button id="sendQuickNote" class="send-button">Send</button>
+                <button id="clearQuickNote" class="clear-button">Clear</button>
             </div>
         </div>
     </div>
 
     <div id="settings" class="tabcontent">
-        <h2>__MSG_settingsTitle__</h2>
+        <h2>Settings</h2>
         <div class="setting-group">
-            <label>__MSG_blinkoApiUrlLabel__</label>
+            <label>Blinko API URL</label>
             <input type="text" id="targetUrl" placeholder="https://your-domain/api/v1">
-            <div class="help-text">__MSG_blinkoApiUrlHelp__</div>
+            <div class="help-text">Enter your Blinko API URL here.</div>
         </div>
         
         <div class="setting-group">
-            <label>__MSG_blinkoAuthKeyLabel__</label>
+            <label>Blinko Auth Key</label>
             <div class="input-container">
                 <input type="text" id="authKey" class="sensitive-input text-input" placeholder="your-auth-key">
-                <button class="toggle-visibility" title="__MSG_showHideButton__">👁️</button>
+                <button class="toggle-visibility" title="Show/Hide">👁️</button>
             </div>
-            <button id="fetchAiConfig" class="fetch-button">__MSG_fetchAiConfigButton__</button>
+            <button id="fetchAiConfig" class="fetch-button">Fetch AI Configuration</button>
         </div>
 
         <div class="setting-group">
-            <label>__MSG_openaiApiUrlLabel__</label>
+            <label>OpenAI API URL</label>
             <input type="text" id="modelUrl" placeholder="https://api.openai.com/v1">
-            <div class="help-text">__MSG_blinkoApiUrlHelp__</div>
+            <div class="help-text">Enter your OpenAI API URL here.</div>
         </div>
         
         <div class="setting-group">
-            <label>__MSG_apiKeyLabel__</label>
+            <label>API Key</label>
             <div class="input-container">
                 <input type="text" id="apiKey" class="sensitive-input text-input" placeholder="sk-...">
-                <button class="toggle-visibility" title="__MSG_showHideButton__">👁️</button>
+                <button class="toggle-visibility" title="Show/Hide">👁️</button>
             </div>
         </div>
 
         <div class="setting-group">
-            <label>__MSG_modelNameLabel__</label>
+            <label>Model Name</label>
             <input type="text" id="modelName" placeholder="gpt-3.5-turbo">
         </div>
 
         <div class="setting-group">
-            <label>__MSG_temperatureLabel__</label>
+            <label>Temperature</label>
             <input type="number" id="temperature" min="0" max="1" step="0.1" value="0.7">
         </div>
 
         <div class="setting-group">
-            <label>__MSG_promptTemplateLabel__</label>
-            <textarea id="promptTemplate" class="text-input" placeholder="__MSG_promptTemplatePlaceholder__"></textarea>
+            <label>Prompt Template</label>
+            <textarea id="promptTemplate" class="text-input" placeholder="Enter your prompt template here"></textarea>
         </div>
 
         <div class="setting-group">
             <label for="includeSummaryUrl">
                 <input type="checkbox" id="includeSummaryUrl">
-                <span>__MSG_includeSummaryUrlLabel__</span>
+                <span>Include Summary URL</span>
             </label>
-            <div class="help-text">__MSG_includeSummaryUrlHelp__</div>
+            <div class="help-text">Include the URL in the summary.</div>
         </div>
 
         <div class="setting-group">
             <label for="includeSelectionUrl">
                 <input type="checkbox" id="includeSelectionUrl">
-                <span>__MSG_includeSelectionUrlLabel__</span>
+                <span>Include Selection URL</span>
             </label>
         </div>
 
         <div class="setting-group">
             <label for="includeImageUrl">
                 <input type="checkbox" id="includeImageUrl">
-                <span>__MSG_includeImageUrlLabel__</span>
+                <span>Include Image URL</span>
             </label>
         </div>
 
         <div class="setting-group">
             <label for="includeQuickNoteUrl">
                 <input type="checkbox" id="includeQuickNoteUrl">
-                <span>__MSG_includeQuickNoteUrlLabel__</span>
+                <span>Include Quick Note URL</span>
             </label>
         </div>
 
         <div class="setting-group">
-            <label>__MSG_summaryTagLabel__</label>
-            <input type="text" id="summaryTag" placeholder="__MSG_summaryTagPlaceholder__">
+            <label>Summary Tag</label>
+            <input type="text" id="summaryTag" placeholder="Enter summary tag here">
         </div>
 
         <div class="setting-group">
-            <label>__MSG_selectionTagLabel__</label>
-            <input type="text" id="selectionTag" placeholder="__MSG_selectionTagPlaceholder__">
+            <label>Selection Tag</label>
+            <input type="text" id="selectionTag" placeholder="Enter selection tag here">
         </div>
 
         <div class="setting-group">
-            <label>__MSG_imageTagLabel__</label>
-            <input type="text" id="imageTag" placeholder="__MSG_imageTagPlaceholder__">
+            <label>Image Tag</label>
+            <input type="text" id="imageTag" placeholder="Enter image tag here">
         </div>
 
         <div class="setting-group">
             <label for="enableFloatingBall">
                 <input type="checkbox" id="enableFloatingBall">
-                <span>__MSG_enableFloatingBallLabel__</span>
+                <span>Enable Floating Ball</span>
             </label>
         </div>
 
         <div class="setting-group">
-            <label>__MSG_jinaApiKeyLabel__</label>
+            <label>Jina API Key</label>
             <div class="input-container">
                 <input type="text" id="jinaApiKey" class="sensitive-input text-input" placeholder="your-jina-api-key">
-                <button class="toggle-visibility" title="__MSG_showHideButton__">👁️</button>
+                <button class="toggle-visibility" title="Show/Hide">👁️</button>
             </div>
         </div>
 
         <div class="setting-group">
             <label for="useJinaApiKey">
                 <input type="checkbox" id="useJinaApiKey">
-                <span>__MSG_useJinaApiKeyLabel__</span>
+                <span>Use Jina API Key</span>
             </label>
         </div>
 
         <div class="setting-group">
             <label for="saveWebImages">
                 <input type="checkbox" id="saveWebImages">
-                <span>__MSG_saveWebImagesLabel__</span>
+                <span>Save Web Images</span>
             </label>
         </div>
 
         <div class="setting-group">
-            <label>__MSG_extractTagLabel__</label>
-            <input type="text" id="extractTag" placeholder="__MSG_extractTagPlaceholder__">
+            <label>Extract Tag</label>
+            <input type="text" id="extractTag" placeholder="Enter extract tag here">
         </div>
 
         <div class="settings-actions">
-            <button id="saveSettings">__MSG_saveSettingsButton__</button>
-            <button id="resetSettings" class="secondary">__MSG_resetSettingsButton__</button>
+            <button id="saveSettings">Save Settings</button>
+            <button id="resetSettings" class="secondary">Reset Settings</button>
         </div>
     </div>
 
     <script type="module" src="js/popup.js"></script>
 </body>
+
 </html>

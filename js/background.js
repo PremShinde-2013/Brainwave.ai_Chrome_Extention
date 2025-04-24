@@ -2,44 +2,44 @@ import { initializeContextMenu, handleContextMenuClick } from './contextMenu.js'
 import { handleContentRequest, handleSaveSummary, handleFloatingBallRequest } from './messageHandler.js';
 import { getSummaryState, clearSummaryState } from './summaryState.js';
 
-// 初始化右键菜单
+// Initialize right-click context menu
 initializeContextMenu();
 
-// 监听来自popup和content script的消息
+// Listen for messages from popup and content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getContent") {
-        // 直接处理，不需要响应
+        // Handle request immediately without needing to keep the message channel open
         handleContentRequest(request);
         sendResponse({ received: true });
-        return false;  // 不需要保持消息通道开放
+        return false;
     }
-    
+
     if (request.action === "saveSummary") {
-        // 立即处理并返回响应
+        // Handle and return response immediately
         handleSaveSummary(request).then(response => {
             try {
                 chrome.runtime.sendMessage({
                     action: 'saveSummaryResponse',
                     response: response
                 }).catch(() => {
-                    // 忽略错误，popup可能已关闭
+                    // Ignore error; popup may have been closed
                 });
             } catch (error) {
-                console.log('Popup可能已关闭');
+                console.log('Popup might be closed');
             }
         });
-        // 返回一个初始响应
+        // Send initial response
         sendResponse({ success: true });
         return false;
     }
 
     if (request.action === "processAndSendContent") {
-        // 立即发送处理中的响应
+        // Send immediate response indicating processing
         sendResponse({ processing: true });
-        
-        // 异步处理请求
+
+        // Asynchronously handle the request
         handleFloatingBallRequest(request).then(response => {
-            // 尝试更新悬浮球状态
+            // Try to update floating ball state
             if (sender.tab && sender.tab.id) {
                 try {
                     chrome.tabs.sendMessage(sender.tab.id, {
@@ -47,39 +47,39 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         success: response.success,
                         error: response.error
                     }).catch(() => {
-                        console.log('无法更新悬浮球状态');
+                        console.log('Unable to update floating ball state');
                     });
                 } catch (error) {
-                    console.log('发送状态更新消息失败');
+                    console.log('Failed to send state update message');
                 }
             }
         }).catch(error => {
-            console.error('处理悬浮球请求失败:', error);
-            // 尝试更新悬浮球状态
+            console.error('Failed to process floating ball request:', error);
+            // Attempt to update floating ball state with failure
             if (sender.tab && sender.tab.id) {
                 try {
                     chrome.tabs.sendMessage(sender.tab.id, {
                         action: 'updateFloatingBallState',
                         success: false,
-                        error: error.message || '处理请求失败'
+                        error: error.message || 'Request processing failed'
                     }).catch(() => {
-                        console.log('无法更新悬浮球状态');
+                        console.log('Unable to update floating ball state');
                     });
                 } catch (error) {
-                    console.log('发送状态更新消息失败');
+                    console.log('Failed to send state update message');
                 }
             }
         });
-        
-        return true; // 保持消息通道开放
+
+        return true; // Keep message channel open
     }
 
     if (request.action === "showNotification") {
-        // 显示系统通知
+        // Show a system notification
         chrome.notifications.create({
             type: 'basic',
             iconUrl: chrome.runtime.getURL('images/icon128.png'),
-            title: request.title || '通知',
+            title: request.title || 'Notification',
             message: request.message || '',
             priority: 2
         });
@@ -88,50 +88,50 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 
     if (request.action === "getSummaryState") {
-        // 同步响应
+        // Send synchronous response with summary state
         sendResponse(getSummaryState());
         return false;
     }
 
     if (request.action === "clearSummary") {
-        // 立即发送响应，避免通道关闭
+        // Send response immediately to avoid message channel closure
         clearSummaryState().then(() => {
             try {
                 chrome.runtime.sendMessage({
                     action: 'clearSummaryResponse',
                     success: true
                 }).catch(() => {
-                    // 忽略错误，popup可能已关闭
+                    // Ignore error; popup may have been closed
                 });
             } catch (error) {
-                console.log('Popup可能已关闭');
+                console.log('Popup might be closed');
             }
         });
         sendResponse({ processing: true });
         return false;
     }
 
-    return false;  // 默认不保持消息通道开放
+    return false;  // By default, do not keep message channel open
 });
 
-// 监听右键菜单点击
+// Listen for context menu click events
 chrome.contextMenus.onClicked.addListener(handleContextMenuClick);
 
-// 监听通知点击
+// Listen for notification click events
 chrome.notifications.onClicked.addListener(async (notificationId) => {
     try {
-        // 获取当前标签页
+        // Get current active tab
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tab) {
-            // 设置标记
-            await chrome.storage.local.set({ 
+            // Set flags on notification click
+            await chrome.storage.local.set({
                 notificationClicked: true,
                 notificationTabId: tab.id
             });
-            // 清除通知
+            // Clear the clicked notification
             chrome.notifications.clear(notificationId);
         }
     } catch (error) {
-        console.error('处理通知点击失败:', error);
+        console.error('Failed to handle notification click:', error);
     }
-}); 
+});

@@ -1,4 +1,4 @@
-// 存储全局总结状态
+/// Store global summary state
 let summaryState = {
     status: 'none',
     summary: null,
@@ -6,18 +6,18 @@ let summaryState = {
     title: null
 };
 
-// 获取总结状态
+// Get the current summary state
 function getSummaryState() {
     return summaryState;
 }
 
-// 更新总结状态
+// Update the summary state
 function updateSummaryState(newState) {
     summaryState = { ...summaryState, ...newState };
     return summaryState;
 }
 
-// 清除总结状态
+// Clear the summary state
 async function clearSummaryState() {
     summaryState = {
         status: 'none',
@@ -25,12 +25,12 @@ async function clearSummaryState() {
         url: null,
         title: null
     };
-    // 同时清除存储的内容
+    // Also clear the stored content
     await chrome.storage.local.remove('currentSummary');
     return summaryState;
 }
 
-// 保存总结到存储
+// Save the summary to local storage
 async function saveSummaryToStorage(summary, url, title) {
     await chrome.storage.local.set({
         currentSummary: {
@@ -42,7 +42,7 @@ async function saveSummaryToStorage(summary, url, title) {
     });
 }
 
-// 从存储加载总结
+// Load the summary from local storage
 async function loadSummaryFromStorage() {
     const result = await chrome.storage.local.get('currentSummary');
     return result.currentSummary;
@@ -54,4 +54,4 @@ export {
     clearSummaryState,
     saveSummaryToStorage,
     loadSummaryFromStorage
-}; 
+};

@@ -1,21 +1,21 @@
-// 提取页面内容
+// Extract page content
 function extractPageContent() {
     try {
-        // 获取正文内容
+        // Get the body text
         const content = document.body.innerText
-            .replace(/[\n\r]+/g, '\n') // 将多个换行符替换为单个
-            .replace(/\s+/g, ' ') // 将多个空格替换为单个
-            .replace(/原文链接：\[.*?\]\(.*?\)/g, '') // 移除可能已存在的原文链接
-            .trim(); // 移除首尾空白
-        
+            .replace(/[\n\r]+/g, '\n') // Replace multiple newline characters with a single one
+            .replace(/\s+/g, ' ') // Replace multiple spaces with a single one
+            .replace(/Original article link：\[.*?\]\(.*?\)/g, '') // Remove any existing original article links
+            .trim(); // Remove leading and trailing whitespace
+
         return content;
     } catch (error) {
-        console.error('提取内容时出错:', error);
+        console.error('Error extracting content:', error);
         throw error;
     }
 }
 
-// 获取页面元数据
+// Get page metadata
 function getPageMetadata() {
     return {
         url: window.location.href,
@@ -23,12 +23,12 @@ function getPageMetadata() {
     };
 }
 
-// 获取选中的文本
+// Get selected text
 function getSelectedText() {
     return window.getSelection().toString();
 }
 
-// 获取图片信息
+// Get image information
 function getImageInfo(img) {
     return {
         src: img.src,
@@ -37,8 +37,8 @@ function getImageInfo(img) {
     };
 }
 
-// 将函数暴露到全局作用域
+// Expose functions to the global scope
 window.extractPageContent = extractPageContent;
 window.getPageMetadata = getPageMetadata;
 window.getSelectedText = getSelectedText;
-window.getImageInfo = getImageInfo; 
+window.getImageInfo = getImageInfo;

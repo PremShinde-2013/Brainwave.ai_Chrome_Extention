@@ -1,11 +1,11 @@
-// 从Jina Reader API获取网页内容
+// Get webpage content from the Jina Reader API
 async function getWebContent(url, settings) {
     try {
         const headers = {
             "Accept": "application/json"
         };
 
-        // 根据设置决定是否添加图片和API key相关header
+        // Add headers based on settings: control image retention and API key
         if (!settings.saveWebImages) {
             headers["X-Retain-Images"] = "none";
         }
@@ -20,16 +20,16 @@ async function getWebContent(url, settings) {
         });
 
         if (!response.ok) {
-            throw new Error(`API请求失败: ${response.status}`);
+            throw new Error(`API request failed: ${response.status}`);
         }
 
         const data = await response.json();
-        
+
         if (data.code !== 200 || !data.data) {
-            throw new Error('API返回格式错误');
+            throw new Error('Invalid API response format');
         }
 
-        // 组织返回内容，不添加链接
+        // Compose the returned content without adding a link
         let content = `# ${data.data.title}\n\n`;
         content += data.data.content;
 
@@ -40,7 +40,7 @@ async function getWebContent(url, settings) {
             url: data.data.url
         };
     } catch (error) {
-        console.error('获取网页内容失败:', error);
+        console.error('Failed to retrieve webpage content:', error);
         return {
             success: false,
             error: error.message
@@ -50,4 +50,4 @@ async function getWebContent(url, settings) {
 
 export {
     getWebContent
-}; 
+};

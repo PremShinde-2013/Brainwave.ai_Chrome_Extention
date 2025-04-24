@@ -1,4 +1,4 @@
-// 创建悬浮球样式
+/// Create floating ball style
 function createFloatingBallStyle() {
     const style = document.createElement('style');
     style.textContent = `
@@ -67,7 +67,7 @@ function createFloatingBallStyle() {
     return style;
 }
 
-// 创建悬浮球元素
+// Create floating ball element
 function createFloatingBallElement() {
     const ball = document.createElement('div');
     ball.id = 'blinko-floating-ball';
@@ -80,22 +80,22 @@ function createFloatingBallElement() {
     return ball;
 }
 
-// 设置悬浮球位置
+// Set floating ball position
 function setFloatingBallPosition(ball, position) {
     Object.assign(ball.style, position);
 }
 
-// 显示加载状态
+// Show loading state
 function showLoadingState(ball) {
     ball.classList.add('processing');
 }
 
-// 隐藏加载状态
+// Hide loading state
 function hideLoadingState(ball) {
     ball.classList.remove('processing');
 }
 
-// 显示成功状态
+// Show success state
 function showSuccessState(ball) {
     ball.classList.remove('processing');
     ball.classList.add('success');
@@ -103,14 +103,14 @@ function showSuccessState(ball) {
     iconImg.src = chrome.runtime.getURL('images/icon128_success_reverse.png');
 }
 
-// 重置状态
+// Reset state
 function resetState(ball) {
     ball.classList.remove('success', 'processing');
     const iconImg = ball.querySelector('img');
     iconImg.src = chrome.runtime.getURL('images/icon128.png');
 }
 
-// 移除悬浮球
+// Remove floating ball
 function removeFloatingBall() {
     const ball = document.getElementById('blinko-floating-ball');
     if (ball) {
@@ -127,4 +127,4 @@ export {
     showSuccessState,
     resetState,
     removeFloatingBall
-}; 
+};

@@ -1,7 +1,7 @@
-// 初始化悬浮球
+/// Initialize floating ball
 initialize();
 
-// 监听来自popup的消息
+// Listen for messages from the popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'getContent') {
         try {
@@ -14,12 +14,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 title: metadata.title
             });
         } catch (error) {
-            console.error('获取内容时出错:', error);
+            console.error('Error retrieving content:', error);
             sendResponse({
                 success: false,
                 error: error.message
             });
         }
     }
-    return true;  // 保持消息通道开放
+    return true;  // Keep the message channel open
 });
